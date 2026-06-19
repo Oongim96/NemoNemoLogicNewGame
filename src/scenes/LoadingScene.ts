@@ -1,9 +1,11 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '@app/game.config';
+import { getAssetLoader, type AssetLoaderService } from '@modules/asset';
 import { fillMobileBackground } from '@ui/mobile-shell';
 
 export class LoadingScene extends Phaser.Scene {
   private barFill!: Phaser.GameObjects.Rectangle;
+  private status!: Phaser.GameObjects.Text;
 
   constructor() {
     super('LoadingScene');
@@ -21,10 +23,10 @@ export class LoadingScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    const stats = this.registry.get('dataStats') as { totalCards: number; totalThresholds: number };
+    const stats = this.registry.get('dataStats') as { totalCards: number };
 
     this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT * 0.38 + 36, `카드 ${stats.totalCards}장 로드`, {
+      .text(GAME_WIDTH / 2, GAME_HEIGHT * 0.38 + 36, `카드 ${stats.totalCards}장 · 리소스 로드`, {
         fontFamily: 'sans-serif',
         fontSize: '13px',
         color: '#8888aa',
@@ -38,26 +40,30 @@ export class LoadingScene extends Phaser.Scene {
       .rectangle((GAME_WIDTH - barW) / 2 + 4, barY, 0, 6, COLORS.accent)
       .setOrigin(0, 0.5);
 
-    const status = this.add
-      .text(GAME_WIDTH / 2, barY + 36, '리소스 준비 중…', {
+    this.status = this.add
+      .text(GAME_WIDTH / 2, barY + 36, '필수 리소스 준비 중…', {
         fontFamily: 'sans-serif',
         fontSize: '12px',
         color: '#7c5cff',
       })
       .setOrigin(0.5);
 
-    this.tweens.add({
-      targets: { w: 0 },
-      w: barW - 8,
-      duration: 1100,
-      ease: 'Sine.easeInOut',
-      onUpdate: (_tween, target) => {
-        this.barFill.width = target.w;
-      },
-      onComplete: () => {
-        status.setText('완료');
-        this.time.delayedCall(350, () => this.scene.start('LoginScene'));
-      },
-    });
+    void this.loadAssets();
+  }
+
+  private async loadAssets(): Promise<void> {
+    const loader = (this.registry.get('assetLoader') as AssetLoaderService | undefined) ?? getAssetLoader();
+
+    try {
+      await loader.loadRequired(this, (p) => {
+        this.barFill.width = (GAME_WIDTH - 88) * p.progress;
+        this.status.setText(`${p.label}…`);
+      });
+      this.status.setText('완료');
+      this.time.delayedCall(350, () => this.scene.start('LoginScene'));
+    } catch {
+      this.status.setText('리소스 로드 실패 — 재시도 중…');
+      this.time.delayedCall(800, () => this.scene.restart());
+    }
   }
 }

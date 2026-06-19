@@ -34,7 +34,7 @@ src/
     meta/                 # PlayerProfile · 가챠·편성 메타
     reward/               # 보상 롤·상수
     draft/                # 3택1·상점 가중치
-    puzzle/               # 네모네모 로직·퍼즐 데이터
+    asset/                 # 에셋 팩·CDN·로더
 data/                     # 기획 원본 (CSV, MD)
 docs/
   spec/                   # 구현 스펙 ← 코드 변경 시 동기화

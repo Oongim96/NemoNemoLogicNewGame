@@ -9,6 +9,7 @@
 | [02-rewards.md](./02-rewards.md) | 구역 보상 3종·확률·상점 보장 | `reward` |
 | [03-draft.md](./03-draft.md) | 3택1 가중치·파티 시너지 | `draft`, `party`, `card` |
 | [04-data-pipeline.md](./04-data-pipeline.md) | CSV→JSON·카드 데이터 | `card`, `data/`, `scripts/` |
+| [05-assets.md](./05-assets.md) | 에셋 팩·CDN·원격 다운로드 | `asset`, `public/assets/` |
 
 ## 기획 문서와의 관계
 
