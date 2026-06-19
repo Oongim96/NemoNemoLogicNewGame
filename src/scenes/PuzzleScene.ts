@@ -13,9 +13,13 @@ import { REWARD_LABELS } from '@modules/reward';
 import type { RunState } from '@modules/run';
 import { RewardOverlay } from '@ui/RewardOverlay';
 
-const CELL = 72;
-const CLUE_ROW_W = 36;
-const CLUE_COL_H = 36;
+function puzzleCellSize(gridSize: number): { cell: number; clueW: number; clueH: number } {
+  const clueW = 26;
+  const clueH = 26;
+  const maxBoard = GAME_WIDTH - 40;
+  const cell = Math.min(52, Math.floor((maxBoard - clueW) / gridSize));
+  return { cell, clueW, clueH };
+}
 
 export class PuzzleScene extends Phaser.Scene {
   private sectionIndex = 0;
@@ -44,6 +48,7 @@ export class PuzzleScene extends Phaser.Scene {
     const puzzle = getSectionPuzzle(this.sectionIndex);
     const run = this.getRun();
     const size = this.solution.length;
+    const { cell: CELL, clueW: CLUE_ROW_W } = puzzleCellSize(size);
 
     this.grid = createEmptyGrid(size);
     this.cellRects = [];
@@ -51,25 +56,26 @@ export class PuzzleScene extends Phaser.Scene {
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, COLORS.background);
 
     this.add
-      .text(GAME_WIDTH / 2, 24, `구역 ${this.sectionIndex + 1} — ${puzzle.label}`, {
+      .text(GAME_WIDTH / 2, 36, `구역 ${this.sectionIndex + 1} · ${puzzle.label}`, {
         fontFamily: 'sans-serif',
-        fontSize: '20px',
+        fontSize: '16px',
         color: '#f0f0f5',
+        fontStyle: 'bold',
       })
       .setOrigin(0.5);
 
     this.hudText = this.add
-      .text(GAME_WIDTH - 16, 24, this.formatHud(run), {
+      .text(GAME_WIDTH / 2, 58, this.formatHud(run), {
         fontFamily: 'sans-serif',
-        fontSize: '12px',
+        fontSize: '11px',
         color: '#8888aa',
       })
-      .setOrigin(1, 0);
+      .setOrigin(0.5);
 
     this.statusText = this.add
-      .text(GAME_WIDTH / 2, 52, '좌클릭: 채우기 · 우클릭: X · 구역 완료 시 보상', {
+      .text(GAME_WIDTH / 2, 78, '탭: 채우기 · 길게/우클릭: X', {
         fontFamily: 'sans-serif',
-        fontSize: '13px',
+        fontSize: '11px',
         color: '#8888aa',
       })
       .setOrigin(0.5);
@@ -77,9 +83,9 @@ export class PuzzleScene extends Phaser.Scene {
     const boardW = size * CELL;
     const boardH = size * CELL;
     const boardX = (GAME_WIDTH - boardW) / 2 + CLUE_ROW_W;
-    const boardY = (GAME_HEIGHT - boardH) / 2 + CLUE_COL_H - 10;
+    const boardY = (GAME_HEIGHT - boardH) / 2 + 20;
 
-    this.drawClues(boardX, boardY, size);
+    this.drawClues(boardX, boardY, size, CELL);
 
     for (let y = 0; y < size; y++) {
       const row: Phaser.GameObjects.Rectangle[] = [];
@@ -126,15 +132,15 @@ export class PuzzleScene extends Phaser.Scene {
     this.hudText.setText(this.formatHud(this.getRun()));
   }
 
-  private drawClues(boardX: number, boardY: number, size: number): void {
+  private drawClues(boardX: number, boardY: number, size: number, cell: number): void {
     const rowClues = getRowClues(this.solution);
     const colClues = getColClues(this.solution);
 
     for (let y = 0; y < size; y++) {
       this.add
-        .text(boardX - 12, boardY + y * CELL + CELL / 2, rowClues[y].join(' '), {
+        .text(boardX - 8, boardY + y * cell + cell / 2, rowClues[y].join(' '), {
           fontFamily: 'monospace',
-          fontSize: '14px',
+          fontSize: '11px',
           color: '#8888aa',
         })
         .setOrigin(1, 0.5);
@@ -142,9 +148,9 @@ export class PuzzleScene extends Phaser.Scene {
 
     for (let x = 0; x < size; x++) {
       this.add
-        .text(boardX + x * CELL + CELL / 2, boardY - 12, colClues[x].join('\n'), {
+        .text(boardX + x * cell + cell / 2, boardY - 8, colClues[x].join('\n'), {
           fontFamily: 'monospace',
-          fontSize: '14px',
+          fontSize: '11px',
           color: '#8888aa',
           align: 'center',
         })

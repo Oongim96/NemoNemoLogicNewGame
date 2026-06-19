@@ -5,7 +5,7 @@
 | 문서 | 내용 | 코드 모듈 |
 | --- | --- | --- |
 | [00-architecture.md](./00-architecture.md) | 레이어·폴더·import 규칙 | `src/app`, `src/modules/*` |
-| [01-run-flow.md](./01-run-flow.md) | 런·맵·퍼즐·클리어 흐름 | `run`, `map`, `puzzle`, `menu` |
+| [01-run-flow.md](./01-run-flow.md) | 앱 진입·런·맵·퍼즐 | `meta`, `run`, `scenes/` |
 | [02-rewards.md](./02-rewards.md) | 구역 보상 3종·확률·상점 보장 | `reward` |
 | [03-draft.md](./03-draft.md) | 3택1 가중치·파티 시너지 | `draft`, `party`, `card` |
 | [04-data-pipeline.md](./04-data-pipeline.md) | CSV→JSON·카드 데이터 | `card`, `data/`, `scripts/` |

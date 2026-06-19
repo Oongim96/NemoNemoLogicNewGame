@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { SECTION_COUNT, SECTION_PUZZLES } from '@modules/puzzle';
+import { SECTION_PUZZLES } from '@modules/puzzle';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '@app/game.config';
 import type { RunState } from '@modules/run';
 
@@ -11,60 +11,62 @@ export class RunCompleteScene extends Phaser.Scene {
   create(): void {
     const run = this.registry.get('runState') as RunState;
     const { gold, mistakes } = run.getProgress();
+    const sectionCount = run.sectionCount;
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, COLORS.background);
 
     this.add
-      .text(GAME_WIDTH / 2, 100, '큰 그림 완성!', {
+      .text(GAME_WIDTH / 2, 80, '큰 그림 완성!', {
         fontFamily: 'sans-serif',
-        fontSize: '36px',
+        fontSize: '28px',
         color: '#f0f0f5',
+        fontStyle: 'bold',
       })
       .setOrigin(0.5);
 
     this.add
-      .text(GAME_WIDTH / 2, 160, '고대 용의 실루엣이 모두 밝혀졌습니다', {
+      .text(GAME_WIDTH / 2, 116, '고대 용의 실루엣이 모두 밝혀졌습니다', {
         fontFamily: 'sans-serif',
-        fontSize: '16px',
+        fontSize: '14px',
         color: '#7c5cff',
       })
       .setOrigin(0.5);
 
-    this.drawFullPicture(GAME_WIDTH / 2, 300);
+    this.drawFullPicture(GAME_WIDTH / 2, 280);
 
     this.add
       .text(
         GAME_WIDTH / 2,
-        470,
-        `구역 ${SECTION_COUNT}/${SECTION_COUNT} · 골드 ${gold} · 실수 ${mistakes}`,
+        420,
+        `구역 ${sectionCount}/${sectionCount} · 골드 ${gold} · 실수 ${mistakes}`,
         {
           fontFamily: 'sans-serif',
-          fontSize: '14px',
+          fontSize: '13px',
           color: '#8888aa',
         },
       )
       .setOrigin(0.5);
 
     this.add
-      .text(GAME_WIDTH / 2, 500, '다음 단계: 자동 전투 1회 (추후 연동)', {
+      .text(GAME_WIDTH / 2, 448, '다음: 자동 전투 1회 (추후)', {
         fontFamily: 'sans-serif',
-        fontSize: '13px',
+        fontSize: '12px',
         color: '#555566',
       })
       .setOrigin(0.5);
 
     const menuBtn = this.add
-      .rectangle(GAME_WIDTH / 2, 560, 200, 44, COLORS.accent)
+      .rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 80, GAME_WIDTH - 48, 48, COLORS.accent)
       .setInteractive({ useHandCursor: true });
     this.add
-      .text(GAME_WIDTH / 2, 560, '메뉴로', {
+      .text(GAME_WIDTH / 2, GAME_HEIGHT - 80, '허브로', {
         fontFamily: 'sans-serif',
         fontSize: '16px',
         color: '#ffffff',
       })
       .setOrigin(0.5);
 
-    menuBtn.on('pointerdown', () => this.scene.start('MainMenuScene'));
+    menuBtn.on('pointerdown', () => this.scene.start('HubScene'));
   }
 
   private drawFullPicture(cx: number, cy: number): void {

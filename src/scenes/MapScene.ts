@@ -1,12 +1,16 @@
 import Phaser from 'phaser';
-import { MAP_SIZE, SECTION_COUNT, SECTION_PUZZLES } from '@modules/puzzle';
+import { getSectionPuzzle } from '@modules/puzzle';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '@app/game.config';
 import { REWARD_CATEGORY_DISPLAY } from '@modules/reward';
 import type { RunState } from '@modules/run';
 
-const MAP_TILE = 140;
 const MAP_GAP = 6;
-const MAP_ORIGIN_X = (GAME_WIDTH - (MAP_SIZE * MAP_TILE + (MAP_SIZE - 1) * MAP_GAP)) / 2;
+
+function tileSizeForMap(mapSize: number): number {
+  const maxW = GAME_WIDTH - 32;
+  if (mapSize === 1) return Math.min(300, maxW - 16);
+  return Math.floor((maxW - (mapSize - 1) * MAP_GAP) / mapSize);
+}
 
 export class MapScene extends Phaser.Scene {
   constructor() {
@@ -19,64 +23,65 @@ export class MapScene extends Phaser.Scene {
 
   create(): void {
     const run = this.getRun();
+    const mapSize = run.mapSize;
+    const sectionCount = run.sectionCount;
+    const tileSize = tileSizeForMap(mapSize);
+    const mapWidth = mapSize * tileSize + (mapSize - 1) * MAP_GAP;
+    const mapOriginX = (GAME_WIDTH - mapWidth) / 2;
     const justCompleted = this.registry.get('mapFlashSection') as number | null;
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, COLORS.background);
 
     this.add
-      .text(GAME_WIDTH / 2, 28, '고대 용의 그림', {
+      .text(GAME_WIDTH / 2, 44, '고대 용의 그림', {
         fontFamily: 'sans-serif',
-        fontSize: '24px',
+        fontSize: '20px',
         color: '#f0f0f5',
+        fontStyle: 'bold',
       })
       .setOrigin(0.5);
 
     this.add
       .text(
         GAME_WIDTH / 2,
-        58,
-        `구역 ${run.completedCount}/${SECTION_COUNT} · 🪙${run.getProgress().gold} · 덱 ${run.getDeck().size}장`,
+        72,
+        `구역 ${run.completedCount}/${sectionCount} · 🪙${run.getProgress().gold} · 덱 ${run.getDeck().size}`,
         {
           fontFamily: 'sans-serif',
-          fontSize: '14px',
+          fontSize: '12px',
           color: '#8888aa',
         },
       )
       .setOrigin(0.5);
 
-    this.add
-      .text(GAME_WIDTH / 2, 82, '구역 중앙 아이콘 = 클리어 보상 · 선택해서 퍼즐 시작', {
-        fontFamily: 'sans-serif',
-        fontSize: '13px',
-        color: '#7c5cff',
-      })
-      .setOrigin(0.5);
+    const mapHeight = mapSize * tileSize + (mapSize - 1) * MAP_GAP;
+    const mapTop = 100 + Math.max(0, (GAME_HEIGHT - 180 - mapHeight) / 2);
 
-    const mapTop = 110;
-    for (let row = 0; row < MAP_SIZE; row++) {
-      for (let col = 0; col < MAP_SIZE; col++) {
-        const sectionIndex = row * MAP_SIZE + col;
-        this.drawSectionTile(sectionIndex, col, row, mapTop, run, justCompleted === sectionIndex);
+    for (let row = 0; row < mapSize; row++) {
+      for (let col = 0; col < mapSize; col++) {
+        const sectionIndex = row * mapSize + col;
+        this.drawSectionTile(
+          sectionIndex,
+          col,
+          row,
+          mapTop,
+          mapOriginX,
+          tileSize,
+          run,
+          justCompleted === sectionIndex,
+        );
       }
     }
 
-    this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT - 72, '좌클릭: 채우기 · 우클릭: X (퍼즐 중)', {
-        fontFamily: 'sans-serif',
-        fontSize: '12px',
-        color: '#555566',
-      })
-      .setOrigin(0.5);
-
     const menuBtn = this.add
-      .text(24, GAME_HEIGHT - 32, '← 메뉴', {
+      .text(16, GAME_HEIGHT - 36, '← 나가기', {
         fontFamily: 'sans-serif',
         fontSize: '16px',
         color: '#7c5cff',
       })
       .setInteractive({ useHandCursor: true });
 
-    menuBtn.on('pointerdown', () => this.scene.start('MainMenuScene'));
+    menuBtn.on('pointerdown', () => this.scene.start('HubScene'));
 
     if (run.isRunComplete()) {
       this.time.delayedCall(600, () => this.scene.start('RunCompleteScene'));
@@ -88,36 +93,38 @@ export class MapScene extends Phaser.Scene {
     col: number,
     row: number,
     mapTop: number,
+    mapOriginX: number,
+    tileSize: number,
     run: RunState,
     flash: boolean,
   ): void {
-    const puzzle = SECTION_PUZZLES[sectionIndex];
-    const x = MAP_ORIGIN_X + col * (MAP_TILE + MAP_GAP) + MAP_TILE / 2;
-    const y = mapTop + row * (MAP_TILE + MAP_GAP) + MAP_TILE / 2;
+    const puzzle = getSectionPuzzle(sectionIndex);
+    const x = mapOriginX + col * (tileSize + MAP_GAP) + tileSize / 2;
+    const y = mapTop + row * (tileSize + MAP_GAP) + tileSize / 2;
     const completed = run.getSectionStatus(sectionIndex) === 'completed';
 
     const frame = this.add
-      .rectangle(x, y, MAP_TILE, MAP_TILE, completed ? 0x2a2a40 : 0x14141f)
+      .rectangle(x, y, tileSize, tileSize, completed ? 0x2a2a40 : 0x14141f)
       .setStrokeStyle(2, completed ? puzzle.pieceColor : 0x3a3a50);
 
     if (completed) {
-      this.drawPiecePixels(x, y, puzzle.solution, puzzle.pieceColor);
+      this.drawPiecePixels(x, y, puzzle.solution, puzzle.pieceColor, tileSize);
     } else {
-      const overlay = this.add.rectangle(x, y, MAP_TILE - 8, MAP_TILE - 8, 0x0a0a12, 0.85);
+      const overlay = this.add.rectangle(x, y, tileSize - 8, tileSize - 8, 0x0a0a12, 0.85);
       const display = REWARD_CATEGORY_DISPLAY[run.getSectionCategory(sectionIndex)];
 
       this.add
-        .text(x, y - 46, `구역 ${sectionIndex + 1}`, {
+        .text(x, y - tileSize * 0.33, `구역 ${sectionIndex + 1}`, {
           fontFamily: 'sans-serif',
           fontSize: '12px',
           color: '#666680',
         })
         .setOrigin(0.5);
 
-      this.add.text(x, y - 4, display.icon, { fontSize: '40px' }).setOrigin(0.5);
+      this.add.text(x, y - 4, display.icon, { fontSize: tileSize >= 120 ? '40px' : '28px' }).setOrigin(0.5);
 
       this.add
-        .text(x, y + 30, display.shortLabel, {
+        .text(x, y + tileSize * 0.22, display.shortLabel, {
           fontFamily: 'sans-serif',
           fontSize: '13px',
           color: display.color,
@@ -126,7 +133,7 @@ export class MapScene extends Phaser.Scene {
         .setOrigin(0.5);
 
       this.add
-        .text(x, y + 52, puzzle.label, {
+        .text(x, y + tileSize * 0.38, puzzle.label, {
           fontFamily: 'sans-serif',
           fontSize: '10px',
           color: '#555566',
@@ -157,9 +164,10 @@ export class MapScene extends Phaser.Scene {
     centerY: number,
     solution: number[][],
     color: number,
+    tileSize: number,
   ): void {
     const size = solution.length;
-    const pixel = (MAP_TILE - 24) / size;
+    const pixel = (tileSize - 24) / size;
     const originX = centerX - ((size * pixel) / 2) + pixel / 2;
     const originY = centerY - ((size * pixel) / 2) + pixel / 2;
 

@@ -13,6 +13,6 @@ export class BootScene extends Phaser.Scene {
   create(): void {
     const stats = cardRepository.getStats();
     this.registry.set('dataStats', stats);
-    this.scene.start('MainMenuScene');
+    this.scene.start('SplashScene');
   }
 }

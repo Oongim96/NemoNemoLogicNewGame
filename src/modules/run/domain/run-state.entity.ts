@@ -1,5 +1,4 @@
-import { DEFAULT_PARTY } from '@modules/party';
-import { MAP_SIZE, SECTION_COUNT } from '@modules/puzzle';
+import { DEFAULT_PARTY, type PartyConfig } from '@modules/party';
 import { cardRepository } from '@modules/card';
 import { InkDeck } from '@modules/deck';
 import {
@@ -7,9 +6,13 @@ import {
   resolveSectionReward,
 } from '@modules/reward/domain/reward-roll.service';
 import type { SectionAssignment, SectionReward, SectionRewardCategory } from '@modules/reward';
-import type { PartyConfig } from '@modules/party';
 import type { RunProgress, SectionStatus } from '@modules/run/domain/run.types';
 import type { RunDraftContext } from '@modules/run/domain/run-draft-context';
+
+export interface RunStartOptions {
+  mapSize?: number;
+  party?: PartyConfig;
+}
 
 export class RunState implements RunDraftContext {
   private progress: RunProgress;
@@ -20,21 +23,23 @@ export class RunState implements RunDraftContext {
   private sectionAssignments: SectionAssignment[];
   private resolvedRewards = new Map<number, SectionReward>();
 
-  constructor() {
+  constructor(options?: RunStartOptions) {
+    const mapSize = options?.mapSize ?? 3;
     this.progress = {
-      mapSize: MAP_SIZE,
+      mapSize,
       completedSections: [],
       gold: 0,
       mistakes: 0,
     };
-    this.party = DEFAULT_PARTY;
+    this.party = options?.party ?? DEFAULT_PARTY;
     this.deck = new InkDeck();
-    this.sectionAssignments = generateRunSectionAssignments(SECTION_COUNT, MAP_SIZE);
+    const sectionCount = mapSize * mapSize;
+    this.sectionAssignments = generateRunSectionAssignments(sectionCount, mapSize);
     this.initStartingDeck();
   }
 
-  static createFresh(): RunState {
-    return new RunState();
+  static createFresh(options?: RunStartOptions): RunState {
+    return new RunState(options);
   }
 
   private initStartingDeck(): void {
@@ -80,8 +85,12 @@ export class RunState implements RunDraftContext {
     return this.progress.completedSections.length;
   }
 
+  get sectionCount(): number {
+    return this.progress.mapSize * this.progress.mapSize;
+  }
+
   isRunComplete(): boolean {
-    return this.completedCount >= SECTION_COUNT;
+    return this.completedCount >= this.sectionCount;
   }
 
   getSectionStatus(sectionIndex: number): SectionStatus {

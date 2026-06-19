@@ -73,7 +73,11 @@ export const SECTION_PUZZLES: SectionPuzzleData[] = SOLUTIONS.map((solution, sec
 }));
 
 export function getSectionPuzzle(sectionIndex: number): SectionPuzzleData {
-  const puzzle = SECTION_PUZZLES[sectionIndex];
-  if (!puzzle) throw new Error(`Unknown section: ${sectionIndex}`);
-  return puzzle;
+  const idx = sectionIndex % SECTION_PUZZLES.length;
+  const base = SECTION_PUZZLES[idx];
+  return {
+    ...base,
+    sectionIndex,
+    label: base.label ?? `구역 ${sectionIndex + 1}`,
+  };
 }

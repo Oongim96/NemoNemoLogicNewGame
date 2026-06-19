@@ -1,14 +1,34 @@
 # 01. 런 플로우
 
+## 앱 진입 (메타)
+
+```txt
+BootScene → SplashScene → LoadingScene → LoginScene → HubScene
+```
+
+| 화면 | 경로 |
+| --- | --- |
+| 스플래시 | `scenes/SplashScene.ts` |
+| 로딩 | `scenes/LoadingScene.ts` |
+| 로그인 | `scenes/LoginScene.ts` |
+| 허브 (하단 네비) | `scenes/HubScene.ts` |
+| 캐릭터 도감 | `scenes/CharacterScene.ts` |
+| 카드 도감 | `scenes/CardCollectionScene.ts` |
+| 팀 편성 | `scenes/TeamScene.ts` |
+| 가챠 / 설정 | `GachaScene`, `SettingsScene` |
+
+전역 메타: `registry.set('playerProfile', PlayerProfile)` — `modules/meta/`
+
 ## 한 런의 상태 머신
 
 ```txt
-MainMenuScene
-  → [런 시작] RunState.createFresh()
+HubScene
+  → [게임 진입] DifficultySelectScene
+  → [난이도] RunState.createFresh({ mapSize, party })
   → MapScene
        → 클릭: PuzzleScene(sectionIndex)
        → 클리어: 보상 오버레이 → MapScene
-       → 9/9 완료: RunCompleteScene
+       → N/N 완료: RunCompleteScene → HubScene
 ```
 
 ## 핵심 엔티티: `RunState`
@@ -25,8 +45,8 @@ MainMenuScene
 
 ## 맵
 
-- 현재: `MAP_SIZE = 3` (9구역), `section-puzzles.data.ts`
-- 구역당 퍼즐 3×3 (데모)
+- 난이도별 `mapSize`: 튜토리얼 **1×1** → 일반 2×2 → 도전 3×3 (`modules/meta/domain/difficulty.types.ts`)
+- 구역당 퍼즐 3×3 (데모), `section-puzzles.data.ts`
 - 완료 구역: 퍼즐 solution 픽셀을 큰 그림 조각으로 표시
 
 ## 퍼즐

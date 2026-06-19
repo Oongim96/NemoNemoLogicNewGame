@@ -1,10 +1,23 @@
-export const GAME_WIDTH = 960;
-export const GAME_HEIGHT = 640;
+/** 모바일 세로 기준 해상도 (9:19.5 근사) */
+export const GAME_WIDTH = 390;
+export const GAME_HEIGHT = 844;
+
+export const LAYOUT = {
+  TOP_BAR: 52,
+  BOTTOM_NAV: 68,
+  SAFE_TOP: 8,
+  CONTENT_TOP: 60,
+  get CONTENT_BOTTOM(): number {
+    return GAME_HEIGHT - this.BOTTOM_NAV;
+  },
+} as const;
 
 export const COLORS = {
   background: 0x0d0d14,
   panel: 0x1a1a2e,
   accent: 0x7c5cff,
+  navBar: 0x12121c,
+  navActive: 0x7c5cff,
   text: 0xf0f0f5,
   textMuted: 0x8888aa,
   cellEmpty: 0x2a2a3e,
