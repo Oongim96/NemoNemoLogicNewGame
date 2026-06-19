@@ -11,8 +11,8 @@
 | [concept-thresholds.md](./concept-thresholds.md) | 덱/턴 임계치 |
 | [드래프트 확률](../../docs/game-design/06c-draft-probability.md) | **3택1 확률** |
 | [ink_cards_master.csv](./ink_cards_master.csv) | **구현용 CSV** (수정 후 `npm run sync-data`) |
-| `../../src/data/ink-cards.json` | 게임 런타임 JSON (자동 생성) |
-| `../../src/data/concept-thresholds.json` | 임계치 JSON (자동 생성) |
+| `../../src/modules/card/infrastructure/data/ink-cards.json` | 게임 런타임 JSON |
+| `../../src/modules/card/infrastructure/data/concept-thresholds.json` | 임계치 JSON |
 
 ## 빠른 통계
 

@@ -1,0 +1,32 @@
+---
+description: 기획서·구현 스펙 동기화 규칙
+alwaysApply: true
+---
+
+# 기획 ↔ 코드 ↔ 스펙 동기화
+
+## 단일 진실 소스
+
+| 변경 종류 | 먼저 수정 | 함께 갱신 |
+| --- | --- | --- |
+| 확률·수치·플로우 | `docs/spec/` + 코드 상수 | `docs/game-design/` 해당 절 |
+| UX·세계관만 | `docs/game-design/` | 스펙은 영향 받는 수치만 |
+| 카드 CSV | `data/cards/*.csv` → `npm run sync-data` | `docs/spec/04-data-pipeline.md` |
+
+## gameplay 로직 변경 시 체크리스트
+
+1. `docs/spec/` 해당 문서 수정 (02-rewards, 03-draft 등)
+2. 코드 상수·서비스가 스펙과 일치하는지 확인
+3. **플레이어에게 보이는 설명**이 바뀌면 `docs/game-design/` 반영
+4. `README.md` 구현 상태 목록 필요 시 갱신
+
+## 금지
+
+- 스펙 없이 확률·보상 규칙만 코드에 하드코딩
+- 기획서와 구현이 어긋난 채로 방치
+
+## 참고
+
+- 구현 스펙: `docs/spec/`
+- 플레이 기획: `docs/game-design/`
+- 원본 데이터: `data/`

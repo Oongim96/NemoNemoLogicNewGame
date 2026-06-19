@@ -6,77 +6,53 @@
 
 ```bash
 npm install
-npm run sync-data   # data/cards/*.csv → src/data/*.json
-npm run dev         # http://localhost:5173
+npm run sync-data   # data/cards/*.csv → src/modules/card/infrastructure/data/
+npm run dev
 ```
 
-| 명령 | 설명 |
-| --- | --- |
-| `npm run dev` | 개발 서버 (핫 리로드) |
-| `npm run build` | 타입체크 + 프로덕션 빌드 → `dist/` |
-| `npm run preview` | 빌드 결과 미리보기 |
-| `npm run sync-data` | 기획 CSV를 게임 JSON으로 변환 |
-| `npm run typecheck` | TypeScript 검사만 |
+## 문서
 
-## 프로젝트 구조
+| 경로 | 용도 |
+| --- | --- |
+| **[docs/spec/README.md](./docs/spec/README.md)** | **구현 스펙** (코드·수치·플로우) |
+| [docs/game-design/README.md](./docs/game-design/README.md) | 플레이 기획 (01~12) |
+| [data/](./data/) | 카드·캐릭터 원본 데이터 |
+| [.cursor/rules/](./.cursor/rules/) | Cursor AI 규칙 |
+
+## 프로젝트 구조 (클린 아키텍처 · 모듈별)
 
 ```txt
-NemoNemoLogicNewGame/
-├── index.html              # Vite 엔트리
-├── package.json
-├── vite.config.ts
-├── tsconfig.json
-│
-├── src/                    # 게임 구현 (TypeScript + Phaser 3)
-│   ├── main.ts             # Phaser 부트스트랩
-│   ├── config.ts           # 해상도·색상 상수
-│   ├── scenes/             # Boot, MainMenu, Puzzle …
-│   ├── systems/            # DataRegistry, InkDeck …
-│   ├── types/              # 카드·컨셉 타입
-│   └── data/               # 런타임 JSON (sync-data로 생성)
-│
-├── public/assets/          # 스프라이트·BGM (추가 예정)
-├── scripts/sync-data.mjs   # CSV → JSON 변환
-│
-├── data/                   # 기획용 원본 데이터 (사람이 편집)
-│   ├── cards/              # 카드 MD·CSV
-│   └── characters/         # 캐릭터 MD
-│
-└── docs/game-design/       # 게임 디자인 문서 (01~12)
+src/
+  app/                    # Phaser 부트, game.config
+  scenes/                 # Phaser Scene (Boot, Map, Puzzle, …)
+  ui/                     # 공유 UI (RewardOverlay 등)
+  modules/
+    card/                 # domain + infrastructure (JSON)
+    deck/                 # 잉크 덱 엔티티
+    party/                # 파티·고유카드
+    run/                  # RunState
+    reward/               # 보상 롤·상수
+    draft/                # 3택1·상점 가중치
+    puzzle/               # 네모네모 로직·퍼즐 데이터
+data/                     # 기획 원본 (CSV, MD)
+docs/
+  spec/                   # 구현 스펙 ← 코드 변경 시 동기화
+  game-design/            # 플레이 기획
+scripts/sync-data.mjs
 ```
 
-### 데이터 흐름
+### 레이어
 
-```txt
-data/cards/ink_cards_master.csv  ──sync-data──►  src/data/ink-cards.json
-data/cards/concept_thresholds.csv ──sync-data──►  src/data/concept-thresholds.json
-```
+- **domain** — 순수 TS (Phaser 없음), `modules/*/domain`
+- **infrastructure** — JSON·리포지토리
+- **scenes / ui** — Phaser Scene·오버레이 (`src/scenes`, `src/ui`)
 
-카드 밸런스를 바꿀 때: **CSV 수정 → `npm run sync-data` → 게임 반영**
+Import: `@app/*`, `@scenes/*`, `@ui/*`, `@modules/<feature>`
 
-읽기용 마크다운(`ink-cards.md`, `limited-characters.md` 등)은 `data/`에 그대로 둡니다.
+## 구현 상태
 
-## 기획 문서
-
-| 경로 | 내용 |
-| --- | --- |
-| **[game-design.md](./game-design.md)** | 기획 목차 (빠른 링크) |
-| **[docs/game-design/README.md](./docs/game-design/README.md)** | 파트별 기획 01~12 |
-| **[data/cards/ink-cards.md](./data/cards/ink-cards.md)** | 카드 52장 |
-| **[data/characters/limited-characters.md](./data/characters/limited-characters.md)** | SSR 8인 |
-
-## 기술 스택
-
-- **TypeScript** + **Phaser 3** + **Vite**
-- 추후 배포: Capacitor (iOS/Android), Tauri (PC)
-
-## 현재 구현 상태
-
-- [x] Vite + Phaser + TS 프로젝트 뼈대
-- [x] 카드·임계치 데이터 로드 (`DataRegistry`)
-- [x] 메인 메뉴 + 5×5 데모 퍼즐 씬
-- [ ] 구역 맵 · 큰 그림
-- [ ] 칸 보상 · 3택1 드래프트
-- [ ] 잉크 덱 · 상점
+- [x] 모듈형 클린 아키텍처
+- [x] 3×3 맵 런 · 구역 퍼즐 · 보상 (3종 맵 표시)
+- [x] 드래프트 · 상점 · 이벤트 버킷
 - [ ] 자동 전투
 - [ ] 이어하기 · 가챠 메타

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '@app/game.config';
+import { RunState } from '@modules/run';
 
 export class MainMenuScene extends Phaser.Scene {
   constructor() {
@@ -34,7 +35,7 @@ export class MainMenuScene extends Phaser.Scene {
       .text(
         GAME_WIDTH / 2,
         240,
-        `네모네모 × 덱빌드 × 자동전투\n카드 ${stats.totalCards}장 · 임계치 ${stats.totalThresholds}개 로드됨`,
+        `네모네모 × 덱빌드 × 자동전투\n카드 ${stats.totalCards}장 · 3×3 맵 런 플레이 가능`,
         {
           fontFamily: 'sans-serif',
           fontSize: '14px',
@@ -49,7 +50,7 @@ export class MainMenuScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     this.add
-      .text(GAME_WIDTH / 2, 360, '퍼즐 체험', {
+      .text(GAME_WIDTH / 2, 360, '런 시작', {
         fontFamily: 'sans-serif',
         fontSize: '18px',
         color: '#ffffff',
@@ -58,6 +59,9 @@ export class MainMenuScene extends Phaser.Scene {
 
     startBtn.on('pointerover', () => startBtn.setFillStyle(0x9b7fff));
     startBtn.on('pointerout', () => startBtn.setFillStyle(COLORS.accent));
-    startBtn.on('pointerdown', () => this.scene.start('PuzzleScene'));
+    startBtn.on('pointerdown', () => {
+      this.registry.set('runState', RunState.createFresh());
+      this.scene.start('MapScene');
+    });
   }
 }

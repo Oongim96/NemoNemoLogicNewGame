@@ -1,0 +1,38 @@
+---
+description: 프로젝트 아키텍처·모듈 구조·레이어 규칙
+alwaysApply: true
+---
+
+# 아키텍처
+
+## 구조
+
+- `src/app/` — Phaser 부트, `game.config.ts`
+- `src/scenes/` — Phaser Scene (여러 모듈 조합, 화면 전환)
+- `src/ui/` — 공유 Phaser UI (오버레이 등)
+- `src/modules/<feature>/` — 기능별 모듈 (domain / infrastructure만)
+- 각 모듈 `index.ts`만 외부 export
+
+## 레이어
+
+| 레이어 | 위치 | Phaser |
+| --- | --- | --- |
+| domain | `modules/*/domain` | 금지 |
+| infrastructure | `modules/*/infrastructure` | 금지 |
+| scenes | `src/scenes/` | 허용 |
+| ui | `src/ui/` | 허용 |
+
+## Import
+
+- `@app/*`, `@scenes/*`, `@ui/*`, `@modules/<feature>` 사용
+- domain은 scenes / ui / Phaser import 금지
+
+## 구현 전 필독
+
+`docs/spec/README.md` — 수치·플로우는 스펙이 기준.
+
+## 새 기능 추가 시
+
+1. `src/modules/<name>/` 에 domain 먼저
+2. Phaser 화면은 `src/scenes/` 또는 공유 UI는 `src/ui/`
+3. `docs/spec/` 에 규칙 추가 또는 갱신

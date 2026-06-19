@@ -1,63 +1,102 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '@app/game.config';
+import {
+  createEmptyGrid,
+  getColClues,
+  getRowClues,
+  getSectionPuzzle,
+  isCellCorrect,
+  isSolutionComplete,
+  type CellState,
+} from '@modules/puzzle';
+import { REWARD_LABELS } from '@modules/reward';
+import type { RunState } from '@modules/run';
+import { RewardOverlay } from '@ui/RewardOverlay';
 
-type CellState = 'empty' | 'fill' | 'mark';
-
-/** 5×5 데모 퍼즐 — 이후 구역·큰 그림 시스템으로 확장 */
-const DEMO_SOLUTION = [
-  [1, 1, 0, 1, 0],
-  [0, 1, 1, 1, 0],
-  [0, 0, 1, 0, 0],
-  [1, 1, 1, 0, 1],
-  [0, 0, 0, 1, 0],
-];
-
-const CELL = 48;
-const GRID = DEMO_SOLUTION.length;
+const CELL = 72;
+const CLUE_ROW_W = 36;
+const CLUE_COL_H = 36;
 
 export class PuzzleScene extends Phaser.Scene {
+  private sectionIndex = 0;
+  private solution: number[][] = [];
   private grid: CellState[][] = [];
   private cellRects: Phaser.GameObjects.Rectangle[][] = [];
   private statusText!: Phaser.GameObjects.Text;
+  private hudText!: Phaser.GameObjects.Text;
+  private finished = false;
+  private inputLocked = false;
+  private rewardOverlay: RewardOverlay | null = null;
 
   constructor() {
     super('PuzzleScene');
   }
 
+  init(data: { sectionIndex: number }): void {
+    this.sectionIndex = data.sectionIndex;
+    this.solution = getSectionPuzzle(this.sectionIndex).solution;
+    this.finished = false;
+    this.inputLocked = false;
+    this.rewardOverlay = null;
+  }
+
   create(): void {
-    this.grid = Array.from({ length: GRID }, () =>
-      Array.from({ length: GRID }, () => 'empty' as CellState),
-    );
+    const puzzle = getSectionPuzzle(this.sectionIndex);
+    const run = this.getRun();
+    const size = this.solution.length;
+
+    this.grid = createEmptyGrid(size);
     this.cellRects = [];
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, COLORS.background);
 
     this.add
-      .text(GAME_WIDTH / 2, 36, '데모 구역 (5×5)', {
+      .text(GAME_WIDTH / 2, 24, `구역 ${this.sectionIndex + 1} — ${puzzle.label}`, {
         fontFamily: 'sans-serif',
         fontSize: '20px',
         color: '#f0f0f5',
       })
       .setOrigin(0.5);
 
-    this.statusText = this.add.text(GAME_WIDTH / 2, 72, '칸을 클릭해 채우기 / 우클릭으로 X', {
-      fontFamily: 'sans-serif',
-      fontSize: '13px',
-      color: '#8888aa',
-    }).setOrigin(0.5);
+    this.hudText = this.add
+      .text(GAME_WIDTH - 16, 24, this.formatHud(run), {
+        fontFamily: 'sans-serif',
+        fontSize: '12px',
+        color: '#8888aa',
+      })
+      .setOrigin(1, 0);
 
-    const offsetX = (GAME_WIDTH - GRID * CELL) / 2;
-    const offsetY = (GAME_HEIGHT - GRID * CELL) / 2 + 20;
+    this.statusText = this.add
+      .text(GAME_WIDTH / 2, 52, '좌클릭: 채우기 · 우클릭: X · 구역 완료 시 보상', {
+        fontFamily: 'sans-serif',
+        fontSize: '13px',
+        color: '#8888aa',
+      })
+      .setOrigin(0.5);
 
-    for (let y = 0; y < GRID; y++) {
+    const boardW = size * CELL;
+    const boardH = size * CELL;
+    const boardX = (GAME_WIDTH - boardW) / 2 + CLUE_ROW_W;
+    const boardY = (GAME_HEIGHT - boardH) / 2 + CLUE_COL_H - 10;
+
+    this.drawClues(boardX, boardY, size);
+
+    for (let y = 0; y < size; y++) {
       const row: Phaser.GameObjects.Rectangle[] = [];
-      for (let x = 0; x < GRID; x++) {
+      for (let x = 0; x < size; x++) {
         const rect = this.add
-          .rectangle(offsetX + x * CELL + CELL / 2, offsetY + y * CELL + CELL / 2, CELL - 4, CELL - 4, COLORS.cellEmpty)
+          .rectangle(
+            boardX + x * CELL + CELL / 2,
+            boardY + y * CELL + CELL / 2,
+            CELL - 4,
+            CELL - 4,
+            COLORS.cellEmpty,
+          )
           .setStrokeStyle(2, 0x3a3a50)
           .setInteractive({ useHandCursor: true });
 
         rect.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+          if (this.finished || this.inputLocked) return;
           this.onCellClick(x, y, pointer.rightButtonDown());
         });
 
@@ -66,15 +105,51 @@ export class PuzzleScene extends Phaser.Scene {
       this.cellRects.push(row);
     }
 
-    const backBtn = this.add
-      .text(24, GAME_HEIGHT - 32, '← 메뉴', {
+    this.add
+      .text(24, GAME_HEIGHT - 32, '← 맵', {
         fontFamily: 'sans-serif',
         fontSize: '16px',
         color: '#7c5cff',
       })
-      .setInteractive({ useHandCursor: true });
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => {
+        if (!this.inputLocked) this.scene.start('MapScene');
+      });
+  }
 
-    backBtn.on('pointerdown', () => this.scene.start('MainMenuScene'));
+  private formatHud(run: RunState): string {
+    const { gold } = run.getProgress();
+    return `🪙${gold} · 덱${run.getDeck().size} · HP${run.getHp()}`;
+  }
+
+  private refreshHud(): void {
+    this.hudText.setText(this.formatHud(this.getRun()));
+  }
+
+  private drawClues(boardX: number, boardY: number, size: number): void {
+    const rowClues = getRowClues(this.solution);
+    const colClues = getColClues(this.solution);
+
+    for (let y = 0; y < size; y++) {
+      this.add
+        .text(boardX - 12, boardY + y * CELL + CELL / 2, rowClues[y].join(' '), {
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          color: '#8888aa',
+        })
+        .setOrigin(1, 0.5);
+    }
+
+    for (let x = 0; x < size; x++) {
+      this.add
+        .text(boardX + x * CELL + CELL / 2, boardY - 12, colClues[x].join('\n'), {
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          color: '#8888aa',
+          align: 'center',
+        })
+        .setOrigin(0.5, 1);
+    }
   }
 
   private onCellClick(x: number, y: number, isRight: boolean): void {
@@ -88,47 +163,72 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.grid[y][x] = next;
     this.refreshCell(x, y);
-    this.checkCell(x, y);
+    this.evaluateCell(x, y);
   }
 
   private refreshCell(x: number, y: number): void {
     const state = this.grid[y][x];
     const rect = this.cellRects[y][x];
-    if (state === 'fill') {
-      rect.setFillStyle(COLORS.cellFill);
-    } else if (state === 'mark') {
-      rect.setFillStyle(COLORS.cellMark);
-    } else {
-      rect.setFillStyle(COLORS.cellEmpty);
-    }
+    if (state === 'fill') rect.setFillStyle(COLORS.cellFill);
+    else if (state === 'mark') rect.setFillStyle(COLORS.cellMark);
+    else rect.setFillStyle(COLORS.cellEmpty);
   }
 
-  private checkCell(x: number, y: number): void {
-    const expected = DEMO_SOLUTION[y][x] === 1;
-    const actual = this.grid[y][x] === 'fill';
+  private evaluateCell(x: number, y: number): void {
+    const result = isCellCorrect(this.solution, this.grid, x, y);
 
-    if (this.grid[y][x] === 'empty' || this.grid[y][x] === 'mark') {
-      if (expected && this.grid[y][x] === 'mark') {
-        this.flashCell(x, y, COLORS.cellWrong);
-        this.statusText.setText('오답 — X 표시한 칸이 채워져야 합니다');
-      } else {
-        this.statusText.setText('칸을 클릭해 채우기 / 우클릭으로 X');
-      }
+    if (result === null) {
+      this.statusText.setText('좌클릭: 채우기 · 우클릭: X · 구역 완료 시 보상');
       return;
     }
 
-    if (expected === actual) {
-      this.flashCell(x, y, COLORS.cellCorrect);
-      this.statusText.setText(`정답! (${x + 1}, ${y + 1}) — 이후 여기서 3택1 드래프트`);
-    } else {
+    if (!result) {
       this.flashCell(x, y, COLORS.cellWrong);
-      this.statusText.setText('오답 — 실수 페널티 (추후 연동)');
+      this.getRun().addMistake();
+      this.refreshHud();
+      this.statusText.setText('오답 — 실수 +1');
+      return;
     }
 
-    if (this.isPuzzleComplete()) {
-      this.time.delayedCall(400, () => {
-        this.statusText.setText('구역 완료! (다음: 맵·드래프트·덱 연동)');
-      });
+    this.flashCell(x, y, COLORS.cellCorrect);
+    this.statusText.setText('정답!');
+
+    if (isSolutionComplete(this.solution, this.grid)) {
+      this.onPuzzleComplete();
+    }
+  }
+
+  private onPuzzleComplete(): void {
+    if (this.finished || this.inputLocked) return;
+    this.finished = true;
+    this.inputLocked = true;
+
+    const run = this.getRun();
+    const puzzle = getSectionPuzzle(this.sectionIndex);
+    run.completeSection(this.sectionIndex);
+    this.refreshHud();
+
+    const reward = run.resolveSectionReward(this.sectionIndex);
+    this.statusText.setText(`구역 완료! — ${REWARD_LABELS[reward.type]}`);
+
+    this.rewardOverlay = new RewardOverlay(this, () => {
+      this.rewardOverlay?.destroy();
+      this.rewardOverlay = null;
+      this.goToMap();
+    });
+
+    this.rewardOverlay.show(reward, run, {
+      sectionTitle: '구역 완료!',
+      sectionSubtitle: `${puzzle.label} · 큰 그림 조각 밝힘 · ${REWARD_LABELS[reward.type]}`,
+    });
+  }
+
+  private goToMap(): void {
+    const run = this.getRun();
+    if (run.isRunComplete()) {
+      this.scene.start('RunCompleteScene');
+    } else {
+      this.scene.start('MapScene', { justCompleted: this.sectionIndex });
     }
   }
 
@@ -143,14 +243,7 @@ export class PuzzleScene extends Phaser.Scene {
     });
   }
 
-  private isPuzzleComplete(): boolean {
-    for (let y = 0; y < GRID; y++) {
-      for (let x = 0; x < GRID; x++) {
-        const shouldFill = DEMO_SOLUTION[y][x] === 1;
-        const isFill = this.grid[y][x] === 'fill';
-        if (shouldFill !== isFill) return false;
-      }
-    }
-    return true;
+  private getRun(): RunState {
+    return this.registry.get('runState') as RunState;
   }
 }

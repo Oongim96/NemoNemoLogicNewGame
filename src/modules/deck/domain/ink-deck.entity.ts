@@ -1,4 +1,4 @@
-import type { InkCard } from '../types/card';
+import type { InkCard } from '@modules/card';
 
 /** 런 중 잉크 덱 상태 (초기 스텁) */
 export class InkDeck {
@@ -27,5 +27,14 @@ export class InkDeck {
     return this.cards.filter(
       (c) => c.conceptPrimary === concept || c.conceptSecondary === concept,
     ).length;
+  }
+
+  countById(cardId: string): number {
+    return this.cards.filter((c) => c.cardId === cardId).length;
+  }
+
+  removeAt(index: number): InkCard | null {
+    if (index < 0 || index >= this.cards.length) return null;
+    return this.cards.splice(index, 1)[0] ?? null;
   }
 }

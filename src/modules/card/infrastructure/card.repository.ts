@@ -1,8 +1,8 @@
-import inkCards from '../data/ink-cards.json';
-import conceptThresholds from '../data/concept-thresholds.json';
-import type { ConceptThreshold, InkCard } from '../types/card';
+import inkCards from '@modules/card/infrastructure/data/ink-cards.json';
+import conceptThresholds from '@modules/card/infrastructure/data/concept-thresholds.json';
+import type { ConceptThreshold, InkCard } from '@modules/card/domain/card.types';
 
-class DataRegistry {
+class CardRepository {
   private cards: InkCard[] = inkCards as InkCard[];
   private thresholds: ConceptThreshold[] = conceptThresholds as ConceptThreshold[];
 
@@ -37,4 +37,4 @@ class DataRegistry {
   }
 }
 
-export const dataRegistry = new DataRegistry();
+export const cardRepository = new CardRepository();

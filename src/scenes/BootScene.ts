@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { dataRegistry } from '../systems/DataRegistry';
+import { cardRepository } from '@modules/card';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -11,7 +11,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    const stats = dataRegistry.getStats();
+    const stats = cardRepository.getStats();
     this.registry.set('dataStats', stats);
     this.scene.start('MainMenuScene');
   }
