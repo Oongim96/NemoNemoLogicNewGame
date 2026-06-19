@@ -1,0 +1,240 @@
+[
+  {
+    "concept": "잉크",
+    "thresholdType": "deck",
+    "thresholdCount": 3,
+    "effectKey": "ink_max_stack_plus",
+    "effectDesc": "잉크 최대 스택 +2"
+  },
+  {
+    "concept": "잉크",
+    "thresholdType": "deck",
+    "thresholdCount": 6,
+    "effectKey": "ink_line_bonus",
+    "effectDesc": "줄 완성 시 잉크 +1 / 잉크 카드 쿨 -1(최소1)"
+  },
+  {
+    "concept": "잉크",
+    "thresholdType": "turn",
+    "thresholdCount": 3,
+    "effectKey": "ink_splash",
+    "effectDesc": "단일 피해 60% 스플래시"
+  },
+  {
+    "concept": "잉크",
+    "thresholdType": "turn",
+    "thresholdCount": 5,
+    "effectKey": "ink_explosion",
+    "effectDesc": "잉크 스택 전부 소모×100 광역"
+  },
+  {
+    "concept": "불꽃",
+    "thresholdType": "deck",
+    "thresholdCount": 4,
+    "effectKey": "burn_max_plus",
+    "effectDesc": "화상 최대 중첩 +2"
+  },
+  {
+    "concept": "불꽃",
+    "thresholdType": "deck",
+    "thresholdCount": 7,
+    "effectKey": "burn_start",
+    "effectDesc": "퍼즐 콤보5+ 시 전투 시작 화상3"
+  },
+  {
+    "concept": "불꽃",
+    "thresholdType": "turn",
+    "thresholdCount": 3,
+    "effectKey": "burn_on_hit",
+    "effectDesc": "연타마다 화상1"
+  },
+  {
+    "concept": "불꽃",
+    "thresholdType": "turn",
+    "thresholdCount": 5,
+    "effectKey": "flame_lane",
+    "effectDesc": "마지막 타격×2 불길통로"
+  },
+  {
+    "concept": "달빛",
+    "thresholdType": "deck",
+    "thresholdCount": 3,
+    "effectKey": "weakpoint_reveal",
+    "effectDesc": "전투 시작 약점1 공개"
+  },
+  {
+    "concept": "달빛",
+    "thresholdType": "deck",
+    "thresholdCount": 5,
+    "effectKey": "weakpoint_puzzle",
+    "effectDesc": "구역당 약점칸 표시 / 약점 시 실드파쇄"
+  },
+  {
+    "concept": "달빛",
+    "thresholdType": "turn",
+    "thresholdCount": 3,
+    "effectKey": "eclipse",
+    "effectDesc": "약점 부위 피해+50%"
+  },
+  {
+    "concept": "달빛",
+    "thresholdType": "turn",
+    "thresholdCount": 4,
+    "effectKey": "full_moon",
+    "effectDesc": "이번 턴 크리100%"
+  },
+  {
+    "concept": "철벽",
+    "thresholdType": "deck",
+    "thresholdCount": 2,
+    "effectKey": "shield_sum_plus",
+    "effectDesc": "실드 합산 +15%"
+  },
+  {
+    "concept": "철벽",
+    "thresholdType": "deck",
+    "thresholdCount": 4,
+    "effectKey": "block_one_hit",
+    "effectDesc": "적 반격 1회 무효"
+  },
+  {
+    "concept": "철벽",
+    "thresholdType": "turn_shield",
+    "thresholdCount": 80,
+    "effectKey": "damage_reduce_50",
+    "effectDesc": "받는 피해 50% 감소"
+  },
+  {
+    "concept": "철벽",
+    "thresholdType": "turn",
+    "thresholdCount": 3,
+    "effectKey": "shield_reflect",
+    "effectDesc": "실드30% 반격"
+  },
+  {
+    "concept": "철벽",
+    "thresholdType": "deck",
+    "thresholdCount": 5,
+    "effectKey": "opening_invuln",
+    "effectDesc": "첫 2턴 무적(1회)"
+  },
+  {
+    "concept": "행운",
+    "thresholdType": "deck",
+    "thresholdCount": 3,
+    "effectKey": "draft_rare_slot",
+    "effectDesc": "3택1 희귀 슬롯 +1"
+  },
+  {
+    "concept": "행운",
+    "thresholdType": "deck",
+    "thresholdCount": 6,
+    "effectKey": "gold_double_chance",
+    "effectDesc": "칸 골드 2배 20%"
+  },
+  {
+    "concept": "행운",
+    "thresholdType": "turn",
+    "thresholdCount": 3,
+    "effectKey": "lucky_seven",
+    "effectDesc": "랜덤 2회 최고값"
+  },
+  {
+    "concept": "행운",
+    "thresholdType": "turn",
+    "thresholdCount": 4,
+    "effectKey": "jackpot",
+    "effectDesc": "피해15%HP넘으면×1.5+골드"
+  },
+  {
+    "concept": "힌트",
+    "thresholdType": "deck",
+    "thresholdCount": 4,
+    "effectKey": "clue_cell_rate",
+    "effectDesc": "보스 단서 칸 확률 UP"
+  },
+  {
+    "concept": "힌트",
+    "thresholdType": "deck",
+    "thresholdCount": 6,
+    "effectKey": "enemy_stat_down",
+    "effectDesc": "전투 시작 적 -8%"
+  },
+  {
+    "concept": "힌트",
+    "thresholdType": "turn",
+    "thresholdCount": 3,
+    "effectKey": "dispel_armor",
+    "effectDesc": "적 버프 제거+방어깎기 2배"
+  },
+  {
+    "concept": "힌트",
+    "thresholdType": "deck5_turn2",
+    "thresholdCount": 2,
+    "effectKey": "prophecy",
+    "effectDesc": "다음 턴 발동 카드 예고+피해30%"
+  },
+  {
+    "concept": "격자",
+    "thresholdType": "deck",
+    "thresholdCount": 3,
+    "effectKey": "line_gold",
+    "effectDesc": "줄 완성 골드+2"
+  },
+  {
+    "concept": "격자",
+    "thresholdType": "deck",
+    "thresholdCount": 5,
+    "effectKey": "battle_mult_stack",
+    "effectDesc": "구역 완료마다 전투 배율+0.05"
+  },
+  {
+    "concept": "격자",
+    "thresholdType": "turn",
+    "thresholdCount": 3,
+    "effectKey": "line_bonus_hit",
+    "effectDesc": "줄완성 1회당 추가 타격1"
+  },
+  {
+    "concept": "격자",
+    "thresholdType": "deck",
+    "thresholdCount": 5,
+    "effectKey": "giant_grid",
+    "effectDesc": "격자 부위별 피해/약점2배"
+  },
+  {
+    "concept": "저주",
+    "thresholdType": "deck",
+    "thresholdCount": 2,
+    "effectKey": "curse_max_plus",
+    "effectDesc": "저주 스택 상한 +3"
+  },
+  {
+    "concept": "저주",
+    "thresholdType": "deck",
+    "thresholdCount": 5,
+    "effectKey": "trap_curse",
+    "effectDesc": "함정 칸도 저주+1"
+  },
+  {
+    "concept": "저주",
+    "thresholdType": "stack",
+    "thresholdCount": 3,
+    "effectKey": "lifesteal",
+    "effectDesc": "공격 흡혈20%"
+  },
+  {
+    "concept": "저주",
+    "thresholdType": "turn",
+    "thresholdCount": 2,
+    "effectKey": "plague_transfer",
+    "effectDesc": "저주 절반 적 이전"
+  },
+  {
+    "concept": "저주",
+    "thresholdType": "deck4_hp50",
+    "thresholdCount": 1,
+    "effectKey": "desperate",
+    "effectDesc": "공격2배/다음 반격2배"
+  }
+]

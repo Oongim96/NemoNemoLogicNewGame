@@ -1,0 +1,53 @@
+card_id,name,concept_primary,concept_secondary,grade,battle_type,battle_cooldown,battle_value,battle_value_max,battle_effect_key,battle_effect_param,puzzle_trigger,puzzle_effect_key,puzzle_effect_param,description,draft_weight,max_per_deck,enabled
+ink_001,연쇄 채색,잉크,,common,attack,1,70,,deal_damage,;ink_stack_add=1,on_cell_correct,reveal_cross_1,range=1,칸 정답: 십자 1칸 힌트. 전투: 70 피해+잉크+1,120,2,1
+ink_002,잉크 방울,잉크,,common,stack,1,2,,ink_stack_add,amount=2,on_line_complete,highlight_line,sec=1,줄 완성: 줄 강조. 전투: 잉크 스택+2,100,2,1
+ink_003,번짐,잉크,,common,special,2,0,,ink_splash_prep,splash_pct=60,on_cell_correct,reveal_adjacent_2,count=2,칸 정답: 인접 2칸 공개. 전투: 잉크 범위 연출 보조,90,2,1
+ink_004,잉크 칠하기,잉크,,common,buff,2,10,,add_buff_pct,stat=atk_pct,passive,mistake_reduce,amount=1,패시브: 실수 피해-1. 전투: 공격력+10%(합산),85,2,1
+ink_005,붉은 잉크,잉크,불꽃,rare,attack,2,0,,ink_stack_consume_mult,mult=80;buff_atk_pct=15,on_mistake,curse_to_atk_stack,per_mistake=1,실수마다 공격 스택+1. 전투: 잉크 전부 소모×80+공격15%,60,2,1
+ink_006,잉크 해일,잉크,,rare,special,3,100,,ink_explosion_if_turn,need_ink_cards=3;mult=100,on_section_complete,reveal_random,cells=3,구역 완료: 랜덤 3칸 공개. 전투: 턴 잉크3장+ 시 폭발 보조,55,1,1
+ink_007,원색 폭발,잉크,,epic,attack,4,0,,ink_stack_consume_mult,mult=100;aoe=true,passive,ink_max_bonus,deck3=2,덱 잉크3+: 스택 상한+2. 전투: 잉크 전부 소모×100 광역,25,1,1
+flame_001,불씨 튀기,불꽃,,common,attack,1,65,,deal_damage,;burn_apply=0,on_combo,mark_wrong_hint,combo=3,콤보3+: 힌트 1개 오류 표시. 전투: 65 연타 1회,115,2,1
+flame_002,점화,불꽃,,common,stack,1,1,,combo_stack_add,amount=1,on_cell_correct,combo_extend,window=2,연속 정답 유지. 전투: 콤보 스택+1(화상 연계),100,2,1
+flame_003,화염 고리,불꽃,,common,attack,2,65,,deal_damage,burn_apply=1,on_line_complete,line_emphasis,glow=1,줄 완성 강조. 전투: 65+화상1,95,2,1
+flame_004,소각,불꽃,,rare,attack,2,80,,deal_damage,burn_apply=2,on_combo,burn_puzzle_stack,combo=5,콤보5: 전투 시작 화상 보조. 전투: 80+화상2,70,2,1
+flame_005,재의 선포,불꽃,,epic,special,4,0,,flame_lane_last_x2,need_hits=5,passive,burn_max_bonus,deck4=2,덱 불꽃4+: 화상 상한+2. 전투: 연타5+ 마지막×2,30,1,1
+flame_006,불꽃 잉크,불꽃,잉크,rare,attack,2,70,,deal_damage,;ink_per_hit=1;consume_on_last=true,on_cell_correct,reveal_cross_1,range=1,교차: 연타마다 잉크+1 마지막에 소모. 퍼즐: 십자 힌트,50,2,1
+moon_001,달빛 조각,달빛,,common,attack,1,50,,deal_damage,crit_rate_add=15,on_line_complete,highlight_line,sec=2,줄 완성: 줄 힌트 2초. 전투: 50+크리15%,110,2,1
+moon_002,은빛 각,달빛,,common,buff,2,20,,add_buff_pct,stat=crit_dmg_pct,passive,weakpoint_hint,rate=5,약점 칸 확률 소폭. 전투: 크리 피해+20%(합산),95,2,1
+moon_003,그림자 밟기,달빛,,common,attack,2,45,,deal_damage,def_shred=5,on_cell_correct,reveal_cell_state,state=unknown,칸 정답: 미확정 칸 1 표시. 전투: 45+방어-5,90,2,1
+moon_004,월식의 눈,달빛,,rare,special,3,0,,eclipse_weakpoint,dmg_bonus_pct=50,on_section_complete,mark_weakpoint_cell,count=1,구역 완료: 약점 칸 1 표시. 전투: 월식 약점+50%,55,1,1
+moon_005,만월 기도,달빛,,rare,buff,2,0,,full_moon_assist,need_moon_cards=4,passive,crit_on_line,line=1,줄 완성 시 크리 UI. 전투: 달빛4장+ 만월 보조,50,1,1
+moon_006,신월 가르기,달빛,힌트,epic,attack,3,120,,deal_damage,crit_guarantee_weak=true,passive,weakpoint_reveal_battle,start=1,교차: 약점 자동+2배. 전투: 약점 120 확정 크리,25,1,1
+wall_001,철벽 각인,철벽,,common,shield,2,35,,add_shield,,on_mistake,mistake_reduce,amount=2,실수 피해-2. 전투: 실드 35(합산),110,2,1
+wall_002,단단한 선,철벽,,common,attack,1,40,,deal_damage,;shield_self=15,passive,shield_puzzle,on_section=10,구역 완료: 실드 10. 전투: 40+실드15,100,2,1
+wall_003,방패 들기,철벽,,common,shield,1,20,,add_shield,,on_cell_correct,prevent_mistake_once,charges=0,패시브 없음. 전투: 실드 20(합산),95,2,1
+wall_004,거울 방패,철벽,,rare,shield,3,50,,add_shield,reflect_pct=30,on_mistake,mistake_to_shield,amount=5,실수 1당 실드 5(퍼즐). 전투: 실드50+반격30%,60,1,1
+wall_005,요새의 심장,철벽,,epic,special,4,0,,opening_invuln,turns=2;need_deck=5,passive,shield_sum_bonus,deck2=15,덱 철벽5+: 개막 2턴 무적. 실드+15%,28,1,1
+wall_006,격자 방벽,철벽,격자,rare,shield,2,30,,add_shield,per_line_complete=10,on_line_complete,line_shield,amount=10,교차: 줄 완성당 실드10. 전투: 실드30+줄보너스,50,2,1
+luck_001,주사위 던지기,행운,,common,attack,1,40,120,random_damage,,on_cell_correct,gold_small,amount=3,칸 정답: 골드+3. 전투: 40~120 랜덤,115,2,1
+luck_002,황금 자,행운,,common,buff,2,10,,add_buff_pct,stat=dmg_pct;line_gold=3,on_line_complete,gold_on_line,amount=3,줄 완성: 골드+3. 전투: 피해+10%(합산),105,2,1
+luck_003,행운의 동전,행운,,common,buff,1,0,,gold_on_battle_win,pct=25,passive,treasure_cell_rate,rate=5,보물 칸 확률+5%. 승리 골드+25%,100,2,1
+luck_004,재굴림,행운,,common,special,2,0,,draft_reroll,charges=1,on_cell_correct,draft_reroll_once,pool=current,칸 정답: 3택1 1회 재굴림. 전투: 없음,85,1,1
+luck_005,럭키 세븐,행운,,rare,special,2,0,,lucky_seven,need_cards=3,passive,draft_rare_hint,deck3=1,덱 행운3+: 희귀 슬롯. 턴3장+ 최고값,55,1,1
+luck_006,잭팟,행운,,epic,special,3,0,,jackpot,need_cards=4;hp_pct=15;mult=1.5,passive,gold_double,rate=20,덱6: 골드2배20%. 턴4장+ 잭팟,30,1,1
+luck_007,저주 주사위,행운,저주,rare,attack,2,40,120,random_damage,min_add_curse_stack=true,on_mistake,curse_stack_add,amount=1,교차: 랜덤 최소=저주스택. 실수: 저주+1,45,2,1
+hint_001,깨진 돋보기,힌트,,common,attack,2,45,,deal_damage,def_shred=5,passive,reveal_random_start,cells=3,시작: 랜덤 3칸 공개. 전투: 45+방어-5,110,2,1
+hint_002,숫자 해석,힌트,,common,special,1,0,,def_shred,amount=3,on_line_complete,verify_line_hint,auto=1,줄 완성: 숫자 재검증. 전투: 방어-3,100,2,1
+hint_003,연필 자국,힌트,,common,buff,2,0,,next_turn_cooldown_reduce,cards=1,on_cell_correct,mark_candidate,cells=1,칸 정답: 후보 1칸 표시. 전투: 다음 턴 쿨-1(희귀),90,2,1
+hint_004,무한 지우개,힌트,,rare,special,3,0,,negate_crit_taken_once,,on_section_complete,negate_mistake,per_section=1,구역당 오답 1 무효. 전투: 치명타 1회 무효,65,1,1
+hint_005,예언의 필체,힌트,,rare,buff,3,0,,prophecy_assist,dmg_bonus=30,passive,clue_cell_rate,deck4=1,덱4: 단서 칸 UP. 덱5+턴2: 다음 턴 예고,50,1,1
+hint_006,전지의 눈,힌트,,epic,special,4,0,,enemy_stat_down,pct=8,passive,analyze_row,free=1,덱6: 적-8%. 퍼즐: 줄 1 무료 분석,28,1,1
+grid_001,줄 완성의 메아리,격자,,common,attack,3,55,,line_count_scaling,mult=3,on_line_complete,highlight_line,sec=1,줄 완성 강조. 전투: 55+줄완성×3,105,2,1
+grid_002,격자 공명,격자,,common,buff,2,10,,add_buff_pct,stat=turn_mult;value=0.1,on_line_complete,gold_small,amount=2,줄 완성: 골드+2. 전투: 턴 배율+0.1(합산),100,2,1
+grid_003,완성의 박,격자,,common,special,2,0,,line_count_scaling,mult=1,on_line_complete,celebrate_line,vfx=1,줄 완성 이펙트. 전투: 줄당 +1 타격 보조,95,2,1
+grid_004,격자 파동,격자,,rare,attack,2,55,,line_count_scaling,mult=4,passive,battle_mult_on_section,per=0.05,구역마다 배율+0.05. 전투: 55+줄×4,60,2,1
+grid_005,완성의 문양,격자,,epic,special,4,0,,giant_grid_mode,weak_x2=true,passive,line_gold_bonus,deck3=2,덱5: 거대격자. 줄 골드+2,30,1,1
+grid_006,잉크 격자,격자,잉크,rare,buff,2,0,,ink_splash_early_unlock,need_turn_ink=2,on_line_complete,ink_on_line,stack=1,교차: 줄 완성 잉크+1 범위 언락,45,2,1
+curse_001,저주 각인,저주,,common,stack,1,1,,curse_stack_add,amount=1,on_mistake,mistake_hp_loss,amount=1,실수: HP-1+저주+1. 전투: 저주 스택+1,100,2,1
+curse_002,맹독 칠,저주,,common,attack,1,35,,deal_damage,scale_curse=25,on_cell_correct,curse_on_trap,double=1,함정 칸: 저주 2배. 전투: 35+저주×25,95,2,1
+curse_003,붉은 계약,저주,,rare,attack,2,30,,deal_damage,scale_curse=25;self_hp_pct=5,passive,curse_max_bonus,deck2=3,덱2: 저주 상한+3. 전투: 30+저주×25 자해5%,65,2,1
+curse_004,역병 인장,저주,,rare,special,3,0,,plague_transfer,pct=50,on_mistake,curse_from_trap,amount=1,함정도 저주+1(덱5). 역병 이전,55,1,1
+curse_005,필사의 각오,저주,,epic,buff,4,40,,desperate_mode,atk_mult=2;taken_mult=2;hp_below=50,passive,lifesteal_at_curse,stack=3,저주3+: 흡혈20%. HP50%- 필사,28,1,1
+curse_006,탐욕의 대가,저주,,rare,buff,2,40,,add_buff_pct,stat=atk_pct;taken_pct=20,on_cell_correct,curse_stack_add,amount=1,공격+40% 받는+20%(합산). 칸: 저주+1,50,2,1
+start_001,기본 칠하기,잉크,,common,attack,1,50,,deal_damage,,passive,none,,시작 덱용. 전투: 50,0,1,1
+start_002,기본 방어,철벽,,common,shield,2,25,,add_shield,,passive,none,,시작 덱용. 전투: 실드 25,0,1,1

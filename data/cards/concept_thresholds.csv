@@ -1,0 +1,35 @@
+concept,threshold_type,threshold_count,effect_key,effect_desc
+잉크,deck,3,ink_max_stack_plus,잉크 최대 스택 +2
+잉크,deck,6,ink_line_bonus,줄 완성 시 잉크 +1 / 잉크 카드 쿨 -1(최소1)
+잉크,turn,3,ink_splash,단일 피해 60% 스플래시
+잉크,turn,5,ink_explosion,잉크 스택 전부 소모×100 광역
+불꽃,deck,4,burn_max_plus,화상 최대 중첩 +2
+불꽃,deck,7,burn_start,퍼즐 콤보5+ 시 전투 시작 화상3
+불꽃,turn,3,burn_on_hit,연타마다 화상1
+불꽃,turn,5,flame_lane,마지막 타격×2 불길통로
+달빛,deck,3,weakpoint_reveal,전투 시작 약점1 공개
+달빛,deck,5,weakpoint_puzzle,구역당 약점칸 표시 / 약점 시 실드파쇄
+달빛,turn,3,eclipse,약점 부위 피해+50%
+달빛,turn,4,full_moon,이번 턴 크리100%
+철벽,deck,2,shield_sum_plus,실드 합산 +15%
+철벽,deck,4,block_one_hit,적 반격 1회 무효
+철벽,turn_shield,80,damage_reduce_50,받는 피해 50% 감소
+철벽,turn,3,shield_reflect,실드30% 반격
+철벽,deck,5,opening_invuln,첫 2턴 무적(1회)
+행운,deck,3,draft_rare_slot,3택1 희귀 슬롯 +1
+행운,deck,6,gold_double_chance,칸 골드 2배 20%
+행운,turn,3,lucky_seven,랜덤 2회 최고값
+행운,turn,4,jackpot,피해15%HP넘으면×1.5+골드
+힌트,deck,4,clue_cell_rate,보스 단서 칸 확률 UP
+힌트,deck,6,enemy_stat_down,전투 시작 적 -8%
+힌트,turn,3,dispel_armor,적 버프 제거+방어깎기 2배
+힌트,deck5_turn2,2,prophecy,다음 턴 발동 카드 예고+피해30%
+격자,deck,3,line_gold,줄 완성 골드+2
+격자,deck,5,battle_mult_stack,구역 완료마다 전투 배율+0.05
+격자,turn,3,line_bonus_hit,줄완성 1회당 추가 타격1
+격자,deck,5,giant_grid,격자 부위별 피해/약점2배
+저주,deck,2,curse_max_plus,저주 스택 상한 +3
+저주,deck,5,trap_curse,함정 칸도 저주+1
+저주,stack,3,lifesteal,공격 흡혈20%
+저주,turn,2,plague_transfer,저주 절반 적 이전
+저주,deck4_hp50,1,desperate,공격2배/다음 반격2배
