@@ -11,14 +11,29 @@ alwaysApply: true
 | --- | --- | --- |
 | 확률·수치·플로우 | `docs/spec/` + 코드 상수 | `docs/game-design/` 해당 절 |
 | UX·세계관만 | `docs/game-design/` | 스펙은 영향 받는 수치만 |
-| 카드 CSV | `data/cards/*.csv` → `npm run sync-data` | `docs/spec/04-data-pipeline.md` |
+| 카드 CSV | `content-source/cards/*.csv` → `npm run sync-data` | `docs/spec/04-data-pipeline.md` |
 
 ## gameplay 로직 변경 시 체크리스트
 
 1. `docs/spec/` 해당 문서 수정 (02-rewards, 03-draft 등)
 2. 코드 상수·서비스가 스펙과 일치하는지 확인
 3. **플레이어에게 보이는 설명**이 바뀌면 `docs/game-design/` 반영
-4. `README.md` 구현 상태 목록 필요 시 갱신
+4. 루트·해당 폴더 **README.md** 갱신 (역할·파일 표·절차)
+5. 루트 `README.md` 구현 상태 목록 필요 시 갱신
+
+## README (`src/` 제외)
+
+각 최상위·주요 폴더에 `README.md`로 역할을 설명한다. 인덱스: 루트 [README.md](../../README.md).
+
+| 폴더 | README |
+| --- | --- |
+| `docs/` | [docs/README.md](../../docs/README.md) |
+| `content-source/` | [content-source/README.md](../../content-source/README.md) |
+| `public/` | [public/README.md](../../public/README.md) |
+| `scripts/` | [scripts/README.md](../../scripts/README.md) |
+| `.cursor/` | [.cursor/README.md](../../.cursor/README.md) |
+
+**폴더 추가·이름 변경·스크립트 추가·파이프라인 변경 시** 해당 README와 루트 표를 함께 수정.
 
 ## 금지
 
@@ -29,4 +44,4 @@ alwaysApply: true
 
 - 구현 스펙: `docs/spec/`
 - 플레이 기획: `docs/game-design/`
-- 원본 데이터: `data/`
+- 원본 데이터: `content-source/`

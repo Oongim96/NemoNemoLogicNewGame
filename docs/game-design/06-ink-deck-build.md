@@ -222,6 +222,6 @@ resolveTurn(cards) {
 - [구역·칸 보상](./05-sections-and-rewards.md)
 - [드래프트 확률](./06c-draft-probability.md)
 - [자동 전투](./07-auto-battle.md)
-- [잉크 카드 목록](../../../data/cards/ink-cards.md)
+- [잉크 카드 목록](../../../content-source/cards/ink-cards.md)
 - [컨셉 카탈로그](./06b-concept-catalog.md)
 - [캐릭터·가챠](./09-characters-gacha.md)

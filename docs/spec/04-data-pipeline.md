@@ -1,12 +1,12 @@
 # 04. 데이터 파이프라인
 
-## 원본 (사람이 편집)
+## 원본 (사람이 편집) — `content-source/`
 
 ```txt
-data/cards/ink_cards_master.csv      → 카드 마스터
-data/cards/concept_thresholds.csv    → 컨셉 임계치
-data/cards/ink-cards.md              → 읽기용 (구현 X)
-data/characters/*.md                 → 캐릭터 기획
+content-source/cards/ink_cards_master.csv      → 카드 마스터
+content-source/cards/concept_thresholds.csv    → 컨셉 임계치
+content-source/cards/ink-cards.md              → 읽기용 (구현 X)
+content-source/characters/*.md                 → 캐릭터 기획
 ```
 
 ## 런타임 JSON
@@ -16,7 +16,7 @@ npm run sync-data
 ```
 
 ```txt
-data/cards/*.csv  →  src/modules/card/infrastructure/data/*.json
+content-source/cards/*.csv  →  src/modules/card/infrastructure/data/*.json
 ```
 
 ## 로드
@@ -30,7 +30,7 @@ data/cards/*.csv  →  src/modules/card/infrastructure/data/*.json
 
 ## 밸런스 수정 절차
 
-1. CSV 수정 (`data/cards/`)
+1. CSV 수정 (`content-source/cards/`)
 2. `npm run sync-data`
 3. 수치가 플레이에 영향 있으면 `docs/spec/03-draft.md` 등 스펙 확인·갱신
 4. UX 설명이 바뀌면 `docs/game-design/` 해당 문서 갱신

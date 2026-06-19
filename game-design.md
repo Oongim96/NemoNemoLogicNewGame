@@ -1,6 +1,6 @@
 # 기획서 (목차)
 
-**→ [docs/game-design/README.md](./docs/game-design/README.md)** · **구현:** [docs/spec/README.md](./docs/spec/README.md)
+**→ [docs/README.md](./docs/README.md)** · **플레이:** [docs/game-design/README.md](./docs/game-design/README.md) · **구현:** [docs/spec/README.md](./docs/spec/README.md)
 
 ## 핵심
 
@@ -11,8 +11,8 @@
 | 문서 | 내용 |
 | --- | --- |
 | [06. 잉크 덱](./docs/game-design/06-ink-deck-build.md) | 덱·3택1·상점 |
-| [한정 캐릭 8인](./data/characters/limited-characters.md) | SSR 컨셉당 1 |
-| [카드 목록](./data/cards/ink-cards.md) | **카드 52장** |
+| [한정 캐릭 8인](./content-source/characters/limited-characters.md) | SSR 컨셉당 1 |
+| [카드 목록](./content-source/cards/ink-cards.md) | **카드 52장** |
 | [02. 게임 루프](./docs/game-design/02-core-loop.md) | 플레이 흐름 |
 | [05. 구역 보상](./docs/game-design/05-sections-and-rewards.md) | 구역 완료 보상 |
 | [구현 스펙](./docs/spec/README.md) | 코드·수치 기준 |

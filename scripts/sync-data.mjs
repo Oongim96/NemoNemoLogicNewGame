@@ -1,5 +1,5 @@
 /**
- * data/cards/*.csv → src/modules/card/infrastructure/data/*.json
+ * content-source/cards/*.csv → src/modules/card/infrastructure/data/*.json
  * 기획 CSV를 수정한 뒤 `npm run sync-data` 로 게임 런타임 데이터를 갱신합니다.
  */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -76,11 +76,11 @@ function coerceThreshold(row) {
 const outDir = join(root, 'src', 'modules', 'card', 'infrastructure', 'data');
 mkdirSync(outDir, { recursive: true });
 
-const cardsCsv = readFileSync(join(root, 'data', 'cards', 'ink_cards_master.csv'), 'utf8');
+const cardsCsv = readFileSync(join(root, 'content-source', 'cards', 'ink_cards_master.csv'), 'utf8');
 const cards = parseCsv(cardsCsv).map(coerceCard);
 writeFileSync(join(outDir, 'ink-cards.json'), JSON.stringify(cards, null, 2), 'utf8');
 
-const thresholdsCsv = readFileSync(join(root, 'data', 'cards', 'concept_thresholds.csv'), 'utf8');
+const thresholdsCsv = readFileSync(join(root, 'content-source', 'cards', 'concept_thresholds.csv'), 'utf8');
 const thresholds = parseCsv(thresholdsCsv).map(coerceThreshold);
 writeFileSync(join(outDir, 'concept-thresholds.json'), JSON.stringify(thresholds, null, 2), 'utf8');
 

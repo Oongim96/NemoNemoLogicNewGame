@@ -1,6 +1,6 @@
 # 06c. 카드 드래프트 확률 (3택1)
 
-[← 잉크 덱 빌드](./06-ink-deck-build.md) · [목차](./README.md) · [카드 목록](../../data/cards/ink-cards.md)
+[← 잉크 덱 빌드](./06-ink-deck-build.md) · [목차](./README.md) · [카드 목록](../../content-source/cards/ink-cards.md)
 
 **드래프트** = **구역 완료 시** 카드 **3장 제시 → 1장 선택**.
 
@@ -223,6 +223,6 @@ function openDraft(party, run):
 
 ## 관련 문서
 
-- [카드 목록](../../data/cards/ink-cards.md) — `draft_weight` 열
+- [카드 목록](../../content-source/cards/ink-cards.md) — `draft_weight` 열
 - [캐릭터·가챠](./09-characters-gacha.md)
 - [구역·보상](./05-sections-and-rewards.md)

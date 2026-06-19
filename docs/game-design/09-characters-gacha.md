@@ -31,7 +31,7 @@
 
 **한정 SSR** = 능력 **아주 좋음**. 퍼즐 스피드 + 덱 시너지 둘 다.
 
-→ 상세: [한정 캐릭터 8인](../../data/characters/limited-characters.md)
+→ 상세: [한정 캐릭터 8인](../../content-source/characters/limited-characters.md)
 
 ---
 
@@ -46,7 +46,7 @@
 | char_mio | 미오 | 행운 | 드래프트 1회 재굴림/런 | `행운` 크리 +15% |
 | char_sera | 세라핀 | 잉크 | 완성률에 따라 HP 회복 | `잉크` 스택당 힐 |
 
-→ [기본 로스터 상세](../../data/characters/base-roster.md)
+→ [기본 로스터 상세](../../content-source/characters/base-roster.md)
 
 ---
 
@@ -63,7 +63,7 @@
 | 격자 | **그리드** | 줄 완성 연쇄 |
 | 저주 | **모이라** | 함정을 파워로 |
 
-각인 **덱 카드와 시너지** 명시 → [limited-characters.md](../../data/characters/limited-characters.md)
+각인 **덱 카드와 시너지** 명시 → [limited-characters.md](../../content-source/characters/limited-characters.md)
 
 ---
 
@@ -131,8 +131,8 @@
 
 ## 관련 문서
 
-- [한정 캐릭터 8인](../../data/characters/limited-characters.md)
-- [기본 로스터](../../data/characters/base-roster.md)
+- [한정 캐릭터 8인](../../content-source/characters/limited-characters.md)
+- [기본 로스터](../../content-source/characters/base-roster.md)
 - [잉크 덱 · 드래프트](./06-ink-deck-build.md)
 - [드래프트 확률](./06c-draft-probability.md)
-- [카드 목록](../../data/cards/ink-cards.md)
+- [카드 목록](../../content-source/cards/ink-cards.md)

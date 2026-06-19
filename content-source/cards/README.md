@@ -39,3 +39,7 @@
 
 - [06. 잉크 덱 빌드](../../docs/game-design/06-ink-deck-build.md)
 - [06c. 드래프트 확률](../../docs/game-design/06c-draft-probability.md)
+
+---
+
+**폴더 안내:** [content-source/README.md](../README.md) · CSV 수정 후 `npm run sync-data` · README는 구조 변경 시 갱신

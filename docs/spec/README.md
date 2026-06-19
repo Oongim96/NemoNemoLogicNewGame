@@ -2,13 +2,14 @@
 
 **코드 구현의 단일 진실 소스.** AI·개발자는 gameplay 로직 변경 시 **이 폴더를 먼저** 본다.
 
+상위 인덱스: [docs/README.md](../README.md)
 | 문서 | 내용 | 코드 모듈 |
 | --- | --- | --- |
 | [00-architecture.md](./00-architecture.md) | 레이어·폴더·import 규칙 | `src/app`, `src/modules/*` |
 | [01-run-flow.md](./01-run-flow.md) | 앱 진입·런·맵·퍼즐 | `meta`, `run`, `scenes/` |
 | [02-rewards.md](./02-rewards.md) | 구역 보상 3종·확률·상점 보장 | `reward` |
 | [03-draft.md](./03-draft.md) | 3택1 가중치·파티 시너지 | `draft`, `party`, `card` |
-| [04-data-pipeline.md](./04-data-pipeline.md) | CSV→JSON·카드 데이터 | `card`, `data/`, `scripts/` |
+| [04-data-pipeline.md](./04-data-pipeline.md) | CSV→JSON·카드 데이터 | `card`, `content-source/`, `scripts/` |
 | [05-assets.md](./05-assets.md) | 에셋 팩·CDN·원격 다운로드 | `asset`, `public/assets/` |
 
 ## 기획 문서와의 관계
