@@ -7,9 +7,8 @@
 ## 풀 필터
 
 1. `enabled`, `draftWeight > 0`
-2. 덱 `maxPerDeck` 미만
-3. 구역 클리어 수 < 7 → epic 제외
-4. 타 파티 고유 카드 제외
+2. 구역 클리어 수 < 7 → epic 제외
+3. 타 파티 고유 카드 제외
 
 ## 가중치 (`computeCardWeight`)
 

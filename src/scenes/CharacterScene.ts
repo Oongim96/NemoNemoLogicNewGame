@@ -1,13 +1,19 @@
 import Phaser from 'phaser';
 import { cardRepository } from '@modules/card';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH, LAYOUT } from '@app/game.config';
+import { COLORS, GAME_WIDTH, LAYOUT } from '@app/game.config';
+import { CHARACTER_DETAIL_TEXT } from '@modules/meta/domain/character-detail.data';
 import { CHARACTER_ROSTER, getCharacterDef, type PlayerProfile } from '@modules/meta';
 import { drawMobileShell } from '@ui/mobile-shell';
+import { characterPortraitKey } from '@ui/collection-detail-art';
+import {
+  CollectionDetailOverlay,
+  GRADE_BORDER,
+} from '@ui/collection-detail-overlay';
 
 export class CharacterScene extends Phaser.Scene {
   private profile!: PlayerProfile;
   private listContainer!: Phaser.GameObjects.Container;
-  private detailContainer: Phaser.GameObjects.Container | null = null;
+  private detailOverlay: CollectionDetailOverlay | null = null;
 
   constructor() {
     super('CharacterScene');
@@ -18,7 +24,7 @@ export class CharacterScene extends Phaser.Scene {
     drawMobileShell(this, '캐릭터', 'characters');
 
     this.add
-      .text(GAME_WIDTH / 2, LAYOUT.CONTENT_TOP - 8, '탭하여 출전 캐릭터 변경', {
+      .text(GAME_WIDTH / 2, LAYOUT.CONTENT_TOP - 8, '탭하여 상세 · 출전 변경', {
         fontFamily: 'sans-serif',
         fontSize: '11px',
         color: '#8888aa',
@@ -31,10 +37,8 @@ export class CharacterScene extends Phaser.Scene {
 
   private renderList(): void {
     this.listContainer.removeAll(true);
-    if (this.detailContainer) {
-      this.detailContainer.destroy();
-      this.detailContainer = null;
-    }
+    this.detailOverlay?.destroy();
+    this.detailOverlay = null;
 
     const owned = new Set(this.profile.getOwnedCharacterIds());
     const sorted = [...CHARACTER_ROSTER].sort((a, b) => {
@@ -56,7 +60,7 @@ export class CharacterScene extends Phaser.Scene {
       const row = this.add
         .rectangle(GAME_WIDTH / 2, y, rowW, 64, isSelected ? 0x32324a : isOwned ? 0x242438 : 0x14141f)
         .setStrokeStyle(isSelected ? 2 : 1, isSelected ? 0xf5c842 : isOwned ? COLORS.accent : 0x333344)
-        .setInteractive({ useHandCursor: isOwned });
+        .setInteractive({ useHandCursor: true });
 
       const badge = ch.grade === 'SSR' ? '★ SSR' : '◆ SR';
       const prefix = isSelected ? '⚔ ' : isOwned ? '' : '🔒 ';
@@ -77,26 +81,7 @@ export class CharacterScene extends Phaser.Scene {
         })
         .setOrigin(0, 0.5);
 
-      if (isOwned) {
-        row.on('pointerdown', () => {
-          this.profile.setSelectedCharacter(ch.id);
-          this.renderList();
-        });
-
-        const info = this.add
-          .text(GAME_WIDTH - 36, y, 'ⓘ', {
-            fontSize: '18px',
-            color: '#8888aa',
-          })
-          .setOrigin(0.5)
-          .setInteractive({ useHandCursor: true });
-        info.on('pointerdown', (p: Phaser.Input.Pointer) => {
-          p.event.stopPropagation();
-          this.showDetail(ch.id);
-        });
-        this.listContainer.add(info);
-      }
-
+      row.on('pointerdown', () => this.showDetail(ch.id));
       this.listContainer.add([row, name, meta]);
       y += 72;
     }
@@ -106,99 +91,78 @@ export class CharacterScene extends Phaser.Scene {
     const def = getCharacterDef(characterId);
     if (!def) return;
 
-    if (this.detailContainer) this.detailContainer.destroy();
-    this.detailContainer = this.add.container(0, 0).setDepth(50);
+    const isOwned = this.profile.ownsCharacter(characterId);
+    const isSelected = this.profile.getSelectedCharacterId() === characterId;
+    const borderColor = GRADE_BORDER[def.grade] ?? COLORS.accent;
+    const detail = CHARACTER_DETAIL_TEXT[characterId];
 
-    const overlay = this.add
-      .rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.7)
-      .setInteractive();
-    this.detailContainer.add(overlay);
+    const conceptLine = def.secondaryConcept
+      ? `${def.primaryConcept} · ${def.secondaryConcept}`
+      : def.primaryConcept;
 
-    const panelH = Math.min(520, LAYOUT.CONTENT_BOTTOM - LAYOUT.CONTENT_TOP - 20);
-    const panelY = LAYOUT.CONTENT_TOP + panelH / 2 + 10;
-    const panel = this.add
-      .rectangle(GAME_WIDTH / 2, panelY, GAME_WIDTH - 24, panelH, COLORS.panel)
-      .setStrokeStyle(2, COLORS.accent);
-    this.detailContainer.add(panel);
+    const sections: { title: string; body: string; muted?: boolean }[] = [];
 
-    const close = this.add
-      .text(GAME_WIDTH - 28, LAYOUT.CONTENT_TOP + 16, '✕', {
-        fontSize: '20px',
-        color: '#8888aa',
-      })
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true });
-    close.on('pointerdown', () => {
-      this.detailContainer?.destroy();
-      this.detailContainer = null;
-    });
-    this.detailContainer.add(close);
+    if (isOwned && detail?.puzzle) {
+      sections.push({ title: '퍼즐 패시브', body: detail.puzzle });
+    }
+    if (isOwned && detail?.battle) {
+      sections.push({ title: '전투 패시브', body: detail.battle });
+    }
+    if (isOwned && detail?.ult) {
+      sections.push({ title: '궁극기', body: detail.ult });
+    }
+    if (isOwned && !detail) {
+      sections.push({ title: '패시브', body: '상세 정보 준비 중', muted: true });
+    }
+    if (!isOwned) {
+      sections.push({
+        title: '잠금',
+        body: '미보유 캐릭터입니다.\n가챠에서 획득할 수 있습니다.',
+        muted: true,
+      });
+    }
 
-    const title = this.add
-      .text(GAME_WIDTH / 2, LAYOUT.CONTENT_TOP + 36, def.name, {
-        fontFamily: 'sans-serif',
-        fontSize: '22px',
-        color: '#f0f0f5',
-        fontStyle: 'bold',
-      })
-      .setOrigin(0.5);
-    this.detailContainer.add(title);
-
-    const detailMeta = this.add
-      .text(GAME_WIDTH / 2, LAYOUT.CONTENT_TOP + 64, `${def.grade} · ${def.primaryConcept} · ${def.tagline}`, {
-        fontFamily: 'sans-serif',
-        fontSize: '12px',
-        color: '#7c5cff',
-      })
-      .setOrigin(0.5);
-    this.detailContainer.add(detailMeta);
-
-    const uniqueTitle = this.add.text(24, LAYOUT.CONTENT_TOP + 96, '고유 · 전용 카드', {
-      fontFamily: 'sans-serif',
-      fontSize: '14px',
-      color: '#f0f0f5',
-      fontStyle: 'bold',
-    });
-    this.detailContainer.add(uniqueTitle);
-
-    let cardY = LAYOUT.CONTENT_TOP + 124;
+    const uniqueLines: string[] = [];
     for (const cardId of def.uniqueCardIds) {
       const card = cardRepository.getCardById(cardId);
-      const cardOwned = this.profile.ownsCard(cardId);
-
-      const row = this.add
-        .rectangle(GAME_WIDTH / 2, cardY, GAME_WIDTH - 48, 52, 0x1a1a2e)
-        .setStrokeStyle(1, cardOwned ? COLORS.accent : 0x444455);
-
-      const cardName = this.add
-        .text(36, cardY - 8, `${cardOwned ? '✓' : '○'} ${card?.name ?? cardId}`, {
-          fontFamily: 'sans-serif',
-          fontSize: '14px',
-          color: cardOwned ? '#f0f0f5' : '#666680',
-        })
-        .setOrigin(0, 0.5);
-
-      const cardMeta = this.add
-        .text(36, cardY + 12, `${card?.conceptPrimary ?? def.primaryConcept} · ${card?.grade ?? '?'}`, {
-          fontFamily: 'sans-serif',
-          fontSize: '11px',
-          color: '#8888aa',
-        })
-        .setOrigin(0, 0.5);
-
-      this.detailContainer.add([row, cardName, cardMeta]);
-      cardY += 60;
+      const mark = this.profile.ownsCard(cardId) ? '✓' : '○';
+      uniqueLines.push(`${mark} ${card?.name ?? cardId}`);
+    }
+    if (uniqueLines.length > 0) {
+      sections.push({
+        title: '고유 · 전용 카드',
+        body: isOwned ? uniqueLines.join('\n') : '???',
+        muted: !isOwned,
+      });
     }
 
-    if (def.uniqueCardIds.length === 0) {
-      const empty = this.add
-        .text(GAME_WIDTH / 2, cardY, '등록된 고유 카드 없음', {
-          fontFamily: 'sans-serif',
-          fontSize: '12px',
-          color: '#555566',
-        })
-        .setOrigin(0.5);
-      this.detailContainer.add(empty);
-    }
+    this.detailOverlay?.destroy();
+    this.detailOverlay = new CollectionDetailOverlay(this, () => {
+      this.detailOverlay = null;
+    });
+
+    this.detailOverlay.show({
+      art: {
+        kind: 'character',
+        borderColor,
+        conceptPrimary: def.primaryConcept,
+        gradeLabel: def.grade,
+        locked: !isOwned,
+        textureKey: characterPortraitKey(characterId),
+      },
+      title: def.name,
+      subtitle: def.tagline,
+      chips: [def.grade, ...conceptLine.split(' · ')],
+      borderColor,
+      sections,
+      footerLabel: isOwned ? (isSelected ? '출전 중' : '출전 캐릭터로 설정') : undefined,
+      footerDisabled: !isOwned || isSelected,
+      onFooter: isOwned
+        ? () => {
+            this.profile.setSelectedCharacter(characterId);
+            this.renderList();
+          }
+        : undefined,
+    });
   }
 }

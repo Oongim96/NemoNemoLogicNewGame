@@ -17,8 +17,6 @@ export class InkDeck {
   }
 
   add(card: InkCard): boolean {
-    const count = this.cards.filter((c) => c.cardId === card.cardId).length;
-    if (count >= card.maxPerDeck) return false;
     this.cards.push(card);
     return true;
   }

@@ -390,11 +390,10 @@ export class RewardOverlay {
     offers.forEach((card) => {
       const price = shopPrice(card);
       const w = L.panelW - 32;
-      const owned = deck.countById(card.cardId) >= card.maxPerDeck;
 
       const box = this.scene.add
         .rectangle(L.centerX, y, w, rowH, 0x242438)
-        .setStrokeStyle(2, owned ? 0x555566 : COLORS.accent);
+        .setStrokeStyle(2, COLORS.accent);
 
       const left = L.centerX - w / 2 + 12;
       const name = this.scene.add
@@ -415,35 +414,33 @@ export class RewardOverlay {
         .setOrigin(0, 0.5);
 
       const priceText = this.scene.add
-        .text(L.centerX + w / 2 - 12, y, owned ? 'MAX' : `🪙 ${price}`, {
+        .text(L.centerX + w / 2 - 12, y, `🪙 ${price}`, {
           fontFamily: 'sans-serif',
           fontSize: '14px',
-          color: owned ? '#666680' : '#ffd700',
+          color: '#ffd700',
           fontStyle: 'bold',
         })
         .setOrigin(1, 0.5);
 
       this.shopContent!.add([box, name, meta, priceText]);
 
-      if (!owned) {
-        box.setInteractive({ useHandCursor: true });
-        box.on('pointerover', () => box.setFillStyle(0x32324a));
-        box.on('pointerout', () => box.setFillStyle(0x242438));
-        box.on('pointerdown', () => {
-          if (!run.spendGold(price)) {
-            priceText.setColor('#e85d5d');
-            priceText.setText('골드 부족');
-            return;
-          }
-          if (!deck.add(card)) return;
-          run.refreshPuzzleModifiers();
-          box.setFillStyle(0x3dd68c);
-          priceText.setText('구매 완료');
-          priceText.setColor('#ffffff');
-          box.disableInteractive();
-          this.refreshShopHud(run);
-        });
-      }
+      box.setInteractive({ useHandCursor: true });
+      box.on('pointerover', () => box.setFillStyle(0x32324a));
+      box.on('pointerout', () => box.setFillStyle(0x242438));
+      box.on('pointerdown', () => {
+        if (!run.spendGold(price)) {
+          priceText.setColor('#e85d5d');
+          priceText.setText('골드 부족');
+          return;
+        }
+        deck.add(card);
+        run.refreshPuzzleModifiers();
+        box.setFillStyle(0x3dd68c);
+        priceText.setText('구매 완료');
+        priceText.setColor('#ffffff');
+        box.disableInteractive();
+        this.refreshShopHud(run);
+      });
 
       y += rowH + gap;
     });

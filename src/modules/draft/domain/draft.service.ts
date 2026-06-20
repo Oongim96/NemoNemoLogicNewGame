@@ -73,9 +73,8 @@ function filterGradeCap(cards: InkCard[], sectionsCleared: number): InkCard[] {
   return cards;
 }
 
-function canAddToDeck(card: InkCard, deck: InkDeck): boolean {
-  const count = deck.getAll().filter((c) => c.cardId === card.cardId).length;
-  return count < card.maxPerDeck;
+function canAddToDeck(_card: InkCard, _deck: InkDeck): boolean {
+  return true;
 }
 
 export function computeCardWeight(
