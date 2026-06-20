@@ -10,6 +10,7 @@ import { CharacterScene } from '@scenes/CharacterScene';
 import { CardCollectionScene } from '@scenes/CardCollectionScene';
 import { SettingsScene } from '@scenes/SettingsScene';
 import { AutoBattleScene } from '@scenes/AutoBattleScene';
+import { BattleSetupScene } from '@scenes/BattleSetupScene';
 import { MapScene } from '@scenes/MapScene';
 import { PuzzleScene } from '@scenes/PuzzleScene';
 import { RunCompleteScene } from '@scenes/RunCompleteScene';
@@ -40,6 +41,7 @@ export function createGame(): Phaser.Game {
       MapScene,
       PuzzleScene,
       RunCompleteScene,
+      BattleSetupScene,
       AutoBattleScene,
     ],
   };

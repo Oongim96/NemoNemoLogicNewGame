@@ -4,13 +4,14 @@
 
 | 파일 | 명령 | 하는 일 |
 | --- | --- | --- |
-| [sync-data.mjs](./sync-data.mjs) | `npm run sync-data` | `content-source/cards/*.csv` → `src/modules/card/infrastructure/data/*.json` |
+| [sync-data.mjs](./sync-data.mjs) | `npm run sync-data` | `content-source/cards/*.csv` → card JSON · `content-source/puzzles/*.json` → puzzle JSON |
 
 ## sync-data.mjs
 
 1. `ink_cards_master.csv` 파싱 → `ink-cards.json` (카드 52장 등)
 2. `concept_thresholds.csv` 파싱 → `concept-thresholds.json`
-3. CSV 컬럼명을 TS 타입에 맞게 변환 (`card_id` → `cardId`, 숫자·bool 보정)
+3. `puzzles/ink-slime-50x50.json` → `ink-slime-50x50.json` (5×5×10×10 → 50×50 masterGrid + 25 sections)
+4. CSV 컬럼명을 TS 타입에 맞게 변환 (`card_id` → `cardId`, 숫자·bool 보정)
 
 **언제 실행**
 

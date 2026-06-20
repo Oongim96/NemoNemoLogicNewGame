@@ -1,9 +1,9 @@
 import { DRAGON_3X3_SET } from '@modules/puzzle/domain/puzzle-sets/dragon-3x3.data';
 import type { PuzzleSet } from '@modules/puzzle/domain/puzzle-sets/puzzle-set.types';
-import { SLIME_10X10_SET } from '@modules/puzzle/domain/puzzle-sets/slime-10x10.data';
+import { SLIME_50X50_SET } from '@modules/puzzle/domain/puzzle-sets/slime-50x50.data';
 import type { SectionPuzzleData } from '@modules/puzzle/domain/puzzle.types';
 
-const SETS: PuzzleSet[] = [DRAGON_3X3_SET, SLIME_10X10_SET];
+const SETS: PuzzleSet[] = [DRAGON_3X3_SET, SLIME_50X50_SET];
 const byId = new Map(SETS.map((s) => [s.id, s]));
 
 export const DEFAULT_PUZZLE_SET_ID = 'dragon_3x3';
@@ -28,4 +28,4 @@ export function getSectionPuzzle(sectionIndex: number, puzzleSetId?: string): Se
 }
 
 /** @deprecated getPuzzleSet('dragon_3x3').sections */
-export { DRAGON_3X3_SET, SLIME_10X10_SET };
+export { DRAGON_3X3_SET, SLIME_50X50_SET };

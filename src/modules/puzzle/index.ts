@@ -14,7 +14,7 @@ export {
   listPuzzleSets,
   DEFAULT_PUZZLE_SET_ID,
   DRAGON_3X3_SET,
-  SLIME_10X10_SET,
+  SLIME_50X50_SET,
 } from '@modules/puzzle/domain/puzzle-set.registry';
 export type { PuzzleSet } from '@modules/puzzle/domain/puzzle-sets/puzzle-set.types';
 export {

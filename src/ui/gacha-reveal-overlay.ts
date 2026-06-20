@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '@app/game.config';
 import type { GachaRevealFace, GachaRevealTile } from '@modules/gacha/domain/gacha-reveal.builder';
-
-/** 1회 소환 기준 카드 크기 · 비율 유지용 */
-const REF_CARD_W = 158;
-const REF_CARD_H = 228;
-const CARD_RATIO = REF_CARD_W / REF_CARD_H;
+import {
+  buildInkCardFace,
+  computePortraitGridLayouts,
+  INK_CARD_REF_W,
+} from '@ui/ink-card-face';
 
 interface TileLayout {
   x: number;
@@ -85,62 +85,15 @@ export class GachaRevealOverlay {
   }
 
   /** 1회·10회 동일 카드 비율(세로형) */
-  private computeLayouts(count: number): TileLayout[] {
+  private computeLayouts(count: number): { x: number; y: number; w: number; h: number }[] {
     const { padX, top, bottom } = this.revealArea();
-    const areaH = bottom - top;
-    const areaW = GAME_WIDTH - padX * 2;
-
-    if (count === 1) {
-      const w = Math.min(REF_CARD_W, areaW);
-      const h = w / CARD_RATIO;
-      return [{ x: GAME_WIDTH / 2, y: top + areaH / 2, w, h }];
-    }
-
-    if (count === 2) {
-      const gap = 14;
-      const w = Math.min(REF_CARD_W, (areaW - gap) / 2);
-      const h = w / CARD_RATIO;
-      const totalW = w * 2 + gap;
-      const startX = (GAME_WIDTH - totalW) / 2 + w / 2;
-      const y = top + areaH / 2;
-      return [
-        { x: startX, y, w, h },
-        { x: startX + w + gap, y, w, h },
-      ];
-    }
-
-    const cols = 2;
-    const rows = Math.ceil(count / cols);
-    const gapX = 12;
-    const gapY = 8;
-
-    const maxW = (areaW - gapX) / cols;
-    const maxH = (areaH - gapY * (rows - 1)) / rows;
-
-    let w = maxW;
-    let h = w / CARD_RATIO;
-    if (h > maxH) {
-      h = maxH;
-      w = h * CARD_RATIO;
-    }
-
-    const gridW = cols * w + gapX;
-    const gridH = rows * h + gapY * (rows - 1);
-    const startX = (GAME_WIDTH - gridW) / 2 + w / 2;
-    const startY = top + (areaH - gridH) / 2 + h / 2;
-
-    return Array.from({ length: count }, (_, i) => ({
-      x: startX + (i % cols) * (w + gapX),
-      y: startY + Math.floor(i / cols) * (h + gapY),
-      w,
-      h,
-    }));
+    return computePortraitGridLayouts(count, { top, bottom, padX }, GAME_WIDTH);
   }
 
   private createTile(data: GachaRevealTile, layout: TileLayout): TileView {
     const face = data.faces[0]!;
     const borderColor = face.borderColor;
-    const scale = layout.w / REF_CARD_W;
+    const scale = layout.w / INK_CARD_REF_W;
     const stroke = Math.max(3, Math.round(4 * scale));
     const backFill = this.blendColor(borderColor, 0x14141f, 0.32);
 
@@ -224,72 +177,7 @@ export class GachaRevealOverlay {
     h: number,
     borderColor: number,
   ): Phaser.GameObjects.Container {
-    const root = this.scene.add.container(0, 0);
-    const scale = w / REF_CARD_W;
-    const stroke = Math.max(3, Math.round(4 * scale));
-
-    const bg = this.scene.add.rectangle(0, 0, w, h, 0x1a1a2e).setStrokeStyle(stroke, borderColor);
-    root.add(bg);
-
-    const tintH = Math.max(18, Math.round(28 * scale));
-    const gradeBar = this.scene.add
-      .rectangle(0, -h / 2 + tintH / 2 + 4, w - stroke * 2, tintH, borderColor, 0.22)
-      .setStrokeStyle(0);
-    root.add(gradeBar);
-
-    const slotLabel = this.scene.add
-      .text(-w / 2 + 10, -h / 2 + tintH / 2 + 4, face.slotLabel, {
-        fontFamily: 'sans-serif',
-        fontSize: `${Math.max(9, Math.round(10 * scale))}px`,
-        color: '#ddddee',
-      })
-      .setOrigin(0, 0.5);
-
-    const icon = this.scene.add
-      .text(0, -h * 0.06, face.icon, {
-        fontFamily: 'sans-serif',
-        fontSize: `${Math.max(18, Math.round(26 * scale))}px`,
-        color: '#f0f0f5',
-      })
-      .setOrigin(0.5);
-
-    const title = this.scene.add
-      .text(0, h * 0.06, face.title, {
-        fontFamily: 'sans-serif',
-        fontSize: `${Math.max(12, Math.round(15 * scale))}px`,
-        color: '#f0f0f5',
-        fontStyle: 'bold',
-        align: 'center',
-        wordWrap: { width: w - 20 },
-      })
-      .setOrigin(0.5);
-
-    const detail = this.scene.add
-      .text(0, h * 0.2, face.detail, {
-        fontFamily: 'sans-serif',
-        fontSize: `${Math.max(9, Math.round(10 * scale))}px`,
-        color: this.colorHex(borderColor),
-        align: 'center',
-        wordWrap: { width: w - 16 },
-      })
-      .setOrigin(0.5);
-
-    root.add([slotLabel, icon, title, detail]);
-
-    if (face.badge) {
-      const badge = this.scene.add
-        .text(w / 2 - 10, -h / 2 + tintH / 2 + 4, face.badge, {
-          fontFamily: 'sans-serif',
-          fontSize: `${Math.max(8, Math.round(10 * scale))}px`,
-          color: '#fff',
-          backgroundColor: face.badge === 'NEW' ? '#7c5cff' : '#444466',
-          padding: { x: 4, y: 2 },
-        })
-        .setOrigin(1, 0.5);
-      root.add(badge);
-    }
-
-    return root;
+    return buildInkCardFace(this.scene, { ...face, borderColor }, w, h);
   }
 
   private colorHex(n: number): string {

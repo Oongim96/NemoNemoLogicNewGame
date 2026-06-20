@@ -1,0 +1,7 @@
+{
+  "id": "slime_50x50",
+  "title": "잉크 슬라임",
+  "mapSize": 5,
+  "puzzleSize": 10,
+  "generateMaster": "slime_blob"
+}

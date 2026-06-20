@@ -30,6 +30,8 @@ export {
 export { BattleState, createBattleInstances } from '@modules/effects/battle/battle-state.entity';
 export { runAutoBattle, prepareBattleState, type AutoBattleInput } from '@modules/effects/battle/auto-battle.service';
 export { buildBattlePlayback } from '@modules/effects/battle/battle-playback.service';
+export { BATTLE_FORMATION_COLS, defaultFormationOrder, swapFormationSlots } from '@modules/effects/battle/battle-formation';
+export { formatTurnLine, summarizeBattleTurns } from '@modules/effects/battle/battle-result-summary';
 export type { BattlePlaybackEvent, BattlePlaybackResult, BattleEventKind } from '@modules/effects/battle/battle-playback.types';
 export {
   getDeckThresholds,

@@ -6,7 +6,7 @@
 
 ```bash
 npm install
-npm run sync-data   # content-source/cards/*.csv → JSON
+npm run sync-data   # content-source/cards/*.csv · puzzles/*.json → JSON
 npm run dev
 ```
 
@@ -22,6 +22,7 @@ npm run dev
 | **[content-source/](./content-source/)** | [content-source/README.md](./content-source/README.md) | CSV·MD **편집용 원본** |
 | ↳ cards | [content-source/cards/README.md](./content-source/cards/README.md) | 카드 52장·임계치 |
 | ↳ characters | [content-source/characters/README.md](./content-source/characters/README.md) | SR·SSR 캐릭터 |
+| ↳ puzzles | [content-source/puzzles/README.md](./content-source/puzzles/README.md) | 50×50 잉크 슬라임 예시 (5×5×10×10) |
 | **[public/](./public/)** | [public/README.md](./public/README.md) | Vite 정적 파일 |
 | ↳ assets | [public/assets/README.md](./public/assets/README.md) | 이미지·에셋 팩 |
 | **[scripts/](./scripts/)** | [scripts/README.md](./scripts/README.md) | `sync-data` 등 빌드 스크립트 |

@@ -33,6 +33,36 @@ function puzzleCellSize(gridSize: number): { cell: number; clueW: number } {
   return { cell, clueW };
 }
 
+/** 완료 파도 애니메이션 총 길이 (칸 수와 무관) */
+const COMPLETION_TOTAL_MS = 1300;
+const COMPLETION_TAIL_MS = 280;
+const COMPLETION_PULSE_MAX_MS = 110;
+const COMPLETION_PULSE_MIN_MS = 36;
+const COMPLETION_STAGGER_MIN_MS = 6;
+
+function completionWaveTiming(cellCount: number): { staggerMs: number; pulseMs: number; tailMs: number } {
+  const tailMs = COMPLETION_TAIL_MS;
+  if (cellCount <= 0) return { staggerMs: 0, pulseMs: 0, tailMs: 0 };
+  if (cellCount === 1) {
+    return {
+      staggerMs: 0,
+      pulseMs: Math.min(COMPLETION_PULSE_MAX_MS, COMPLETION_TOTAL_MS - tailMs),
+      tailMs,
+    };
+  }
+
+  const pulseMs = Math.max(
+    COMPLETION_PULSE_MIN_MS,
+    Math.min(COMPLETION_PULSE_MAX_MS, Math.floor((COMPLETION_TOTAL_MS - tailMs) / cellCount / 2)),
+  );
+  const pulseTotal = pulseMs * 2;
+  const staggerMs = Math.max(
+    COMPLETION_STAGGER_MIN_MS,
+    Math.floor((COMPLETION_TOTAL_MS - pulseTotal - tailMs) / (cellCount - 1)),
+  );
+  return { staggerMs, pulseMs, tailMs };
+}
+
 export class PuzzleScene extends Phaser.Scene {
   private sectionIndex = 0;
   private solution: number[][] = [];
@@ -43,6 +73,9 @@ export class PuzzleScene extends Phaser.Scene {
   private effectText!: Phaser.GameObjects.Text;
   private finished = false;
   private inputLocked = false;
+  private flashPending = 0;
+  private completionQueued = false;
+  private completionOrigin = { x: 0, y: 0 };
   private rewardOverlay: RewardOverlay | null = null;
   private session!: PuzzleSession;
   private sectionMistakes = 0;
@@ -61,6 +94,8 @@ export class PuzzleScene extends Phaser.Scene {
     this.solution = getSectionPuzzle(this.sectionIndex, this.getPuzzleSetId()).solution;
     this.finished = false;
     this.inputLocked = false;
+    this.flashPending = 0;
+    this.completionQueued = false;
     this.rewardOverlay = null;
     this.sectionMistakes = 0;
     this.session = new PuzzleSession(this.solution);
@@ -133,7 +168,7 @@ export class PuzzleScene extends Phaser.Scene {
           .setInteractive({ useHandCursor: true });
 
         rect.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-          if (this.finished || this.inputLocked) return;
+          if (this.isInputBlocked()) return;
           this.onCellClick(x, y, pointer.rightButtonDown());
         });
 
@@ -150,7 +185,7 @@ export class PuzzleScene extends Phaser.Scene {
       })
       .setInteractive({ useHandCursor: true })
       .on('pointerdown', () => {
-        if (!this.inputLocked) this.scene.start('MapScene');
+        if (!this.isInputBlocked()) this.scene.start('MapScene');
       });
 
     this.drawUltButton(run);
@@ -172,7 +207,7 @@ export class PuzzleScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     btn.on('pointerdown', () => {
-      if (this.finished || run.getUltUsesThisSection() <= 0) return;
+      if (this.isInputBlocked() || run.getUltUsesThisSection() <= 0) return;
       const ult = tryCharacterUlt(charId, 'reset_mistakes', run.getUltUsesThisSection());
       if (!ult.used) return;
       run.consumeUlt();
@@ -242,6 +277,10 @@ export class PuzzleScene extends Phaser.Scene {
     else rect.setFillStyle(COLORS.cellEmpty);
   }
 
+  private isInputBlocked(): boolean {
+    return this.finished || this.inputLocked || this.flashPending > 0 || this.completionQueued;
+  }
+
   private evaluateCell(x: number, y: number): void {
     const run = this.getRun();
     const result = isCellCorrect(this.solution, this.grid, x, y);
@@ -250,6 +289,8 @@ export class PuzzleScene extends Phaser.Scene {
       this.statusText.setText('좌클릭: 채우기 · 우클릭: X · 카드 효과 발동');
       return;
     }
+
+    this.inputLocked = true;
 
     if (!result) {
       this.flashCell(x, y, COLORS.cellWrong);
@@ -272,6 +313,7 @@ export class PuzzleScene extends Phaser.Scene {
       this.applyEffectResult(run, fx);
       this.refreshHud();
       this.statusText.setText('오답 — 실수 +1');
+      this.releaseInputIfIdle();
       return;
     }
 
@@ -295,8 +337,92 @@ export class PuzzleScene extends Phaser.Scene {
     this.checkLineComplete(y, x);
 
     if (isSolutionComplete(this.solution, this.grid)) {
-      this.onPuzzleComplete();
+      this.queuePuzzleComplete(x, y);
+      return;
     }
+
+    this.releaseInputIfIdle();
+  }
+
+  private releaseInputIfIdle(): void {
+    if (this.flashPending === 0 && !this.completionQueued && !this.finished) {
+      this.inputLocked = false;
+    }
+  }
+
+  private queuePuzzleComplete(x: number, y: number): void {
+    if (this.finished || this.completionQueued) return;
+    this.completionQueued = true;
+    this.inputLocked = true;
+    this.completionOrigin = { x, y };
+    if (this.flashPending === 0) this.playCompletionFillSequence();
+  }
+
+  private onFlashDone(): void {
+    if (this.completionQueued && this.flashPending === 0) {
+      this.playCompletionFillSequence();
+      return;
+    }
+    this.releaseInputIfIdle();
+  }
+
+  private playCompletionFillSequence(): void {
+    this.completionQueued = false;
+    this.inputLocked = true;
+
+    const cells: { x: number; y: number; dist: number }[] = [];
+    for (let y = 0; y < this.solution.length; y++) {
+      for (let x = 0; x < this.solution[y]!.length; x++) {
+        if (this.solution[y]![x] !== 1) continue;
+        const dist =
+          Math.abs(x - this.completionOrigin.x) + Math.abs(y - this.completionOrigin.y);
+        cells.push({ x, y, dist });
+      }
+    }
+
+    if (cells.length === 0) {
+      this.finishPuzzleComplete();
+      return;
+    }
+
+    cells.sort((a, b) => a.dist - b.dist || a.y - b.y || a.x - b.x);
+
+    const { staggerMs, pulseMs, tailMs } = completionWaveTiming(cells.length);
+    let remaining = cells.length;
+
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i]!;
+      this.time.delayedCall(i * staggerMs, () => {
+        this.pulseFillCell(cell.x, cell.y, pulseMs, () => {
+          remaining--;
+          if (remaining === 0) {
+            this.time.delayedCall(tailMs, () => this.finishPuzzleComplete());
+          }
+        });
+      });
+    }
+  }
+
+  private pulseFillCell(x: number, y: number, pulseMs: number, onDone: () => void): void {
+    const rect = this.cellRects[y]![x]!;
+    this.grid[y]![x] = 'fill';
+    rect.setFillStyle(COLORS.cellCorrect);
+    this.flashPending++;
+
+    this.tweens.add({
+      targets: rect,
+      scaleX: 1.14,
+      scaleY: 1.14,
+      duration: pulseMs,
+      yoyo: true,
+      ease: 'Quad.easeOut',
+      onComplete: () => {
+        rect.setScale(1, 1);
+        rect.setFillStyle(COLORS.cellFill);
+        this.flashPending--;
+        onDone();
+      },
+    });
   }
 
   private checkLineComplete(row: number, col: number): void {
@@ -373,8 +499,8 @@ export class PuzzleScene extends Phaser.Scene {
     });
   }
 
-  private onPuzzleComplete(): void {
-    if (this.finished || this.inputLocked) return;
+  private finishPuzzleComplete(): void {
+    if (this.finished) return;
     this.finished = true;
     this.inputLocked = true;
 
@@ -420,13 +546,16 @@ export class PuzzleScene extends Phaser.Scene {
   }
 
   private flashCell(x: number, y: number, color: number): void {
-    const rect = this.cellRects[y][x];
-    const prev = this.grid[y][x];
+    const rect = this.cellRects[y]![x]!;
+    const prev = this.grid[y]![x];
+    this.flashPending++;
     rect.setFillStyle(color);
     this.time.delayedCall(200, () => {
       if (prev === 'fill') rect.setFillStyle(COLORS.cellFill);
       else if (prev === 'mark') rect.setFillStyle(COLORS.cellMark);
       else rect.setFillStyle(COLORS.cellEmpty);
+      this.flashPending--;
+      this.onFlashDone();
     });
   }
 

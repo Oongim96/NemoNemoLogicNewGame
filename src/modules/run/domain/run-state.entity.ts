@@ -35,6 +35,7 @@ export class RunState implements RunDraftContext {
     puzzleComboMax: 0,
   };
   private ultUsesThisSection = 1;
+  private battleFormation: number[] | null = null;
 
   constructor(options?: RunStartOptions) {
     const mapSize = options?.mapSize ?? 3;
@@ -210,5 +211,26 @@ export class RunState implements RunDraftContext {
 
   updateComboMax(combo: number): void {
     if (combo > this.carryover.puzzleComboMax) this.carryover.puzzleComboMax = combo;
+  }
+
+  initBattleFormation(): void {
+    const n = this.deck.size;
+    this.battleFormation = Array.from({ length: n }, (_, i) => i);
+  }
+
+  getBattleFormation(): number[] {
+    if (!this.battleFormation || this.battleFormation.length !== this.deck.size) {
+      this.initBattleFormation();
+    }
+    return [...this.battleFormation!];
+  }
+
+  setBattleFormation(order: number[]): void {
+    if (order.length !== this.deck.size) return;
+    this.battleFormation = [...order];
+  }
+
+  getEnemyHpForBattle(): number {
+    return 2400 + this.mapSize * 400;
   }
 }

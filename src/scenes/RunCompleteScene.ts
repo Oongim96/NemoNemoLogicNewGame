@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { getPuzzleSet } from '@modules/puzzle';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '@app/game.config';
 import type { RunState } from '@modules/run';
+import { computePictureSize } from '@modules/meta';
 
 export class RunCompleteScene extends Phaser.Scene {
   constructor() {
@@ -10,8 +11,16 @@ export class RunCompleteScene extends Phaser.Scene {
 
   create(): void {
     const run = this.registry.get('runState') as RunState;
+    const picture = this.registry.get('currentPicture') as
+      | { title?: string; mapSize?: number; puzzleSize?: number }
+      | undefined;
     const { gold, mistakes } = run.getProgress();
     const sectionCount = run.sectionCount;
+    const stageTitle = picture?.title ?? '큰 그림';
+    const pictureSize =
+      picture?.mapSize != null && picture?.puzzleSize != null
+        ? computePictureSize(picture.mapSize, picture.puzzleSize)
+        : sectionCount;
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, COLORS.background);
 
@@ -25,7 +34,7 @@ export class RunCompleteScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(GAME_WIDTH / 2, 116, '고대 용의 실루엣이 모두 밝혀졌습니다', {
+      .text(GAME_WIDTH / 2, 116, `${stageTitle} · ${pictureSize}×${pictureSize} 실루엣이 모두 밝혀졌습니다`, {
         fontFamily: 'sans-serif',
         fontSize: '14px',
         color: '#7c5cff',
@@ -48,7 +57,7 @@ export class RunCompleteScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(GAME_WIDTH / 2, 448, '잠시 후 자동 전투…', {
+      .text(GAME_WIDTH / 2, 448, '잠시 후 전투 배치… (런 골드는 전투 후 지급)', {
         fontFamily: 'sans-serif',
         fontSize: '12px',
         color: '#555566',
@@ -56,21 +65,21 @@ export class RunCompleteScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.time.delayedCall(1800, () => {
-      this.scene.start('AutoBattleScene');
+      this.scene.start('BattleSetupScene');
     });
 
     const menuBtn = this.add
       .rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 80, GAME_WIDTH - 48, 48, 0x333344)
       .setInteractive({ useHandCursor: true });
     this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT - 80, '전투 스킵 →', {
+      .text(GAME_WIDTH / 2, GAME_HEIGHT - 80, '전투 준비 →', {
         fontFamily: 'sans-serif',
         fontSize: '16px',
         color: '#ffffff',
       })
       .setOrigin(0.5);
 
-    menuBtn.on('pointerdown', () => this.scene.start('AutoBattleScene'));
+    menuBtn.on('pointerdown', () => this.scene.start('BattleSetupScene'));
   }
 
   private drawFullPicture(cx: number, cy: number): void {

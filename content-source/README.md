@@ -6,6 +6,7 @@
 | --- | --- | --- |
 | [cards/](./cards/) | [cards/README.md](./cards/README.md) | `npm run sync-data` → `src/modules/card/infrastructure/data/*.json` |
 | [characters/](./characters/) | [characters/README.md](./characters/README.md) | (추후 sync) · 현재 `modules/meta` 코드 |
+| [puzzles/](./puzzles/) | [puzzles/README.md](./puzzles/README.md) | `npm run sync-data` → `src/modules/puzzle/infrastructure/data/*.json` |
 
 ## 다른 폴더와 구분
 

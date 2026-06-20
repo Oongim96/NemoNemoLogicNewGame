@@ -359,30 +359,148 @@ export class AutoBattleArena {
 export class AutoBattleLog {
   private lines: string[] = [];
   private text!: Phaser.GameObjects.Text;
+  private scrollRoot!: Phaser.GameObjects.Container;
+  private maskShape!: Phaser.GameObjects.Rectangle;
+  private scrollZone!: Phaser.GameObjects.Rectangle;
+  private scrollTrack!: Phaser.GameObjects.Rectangle;
+  private scrollThumb!: Phaser.GameObjects.Rectangle;
+  private scrollOffset = 0;
+  private maxScroll = 0;
+  private scrollDragStart: { y: number; offset: number } | null = null;
+  private thumbDragStart: { y: number; offset: number } | null = null;
+  private stickToBottom = true;
+  private readonly top: number;
+  private readonly h: number;
+  private readonly padX = 24;
+  private readonly trackX: number;
+  private readonly trackTop: number;
+  private readonly trackH: number;
+  private readonly thumbW = 4;
+  private readonly thumbMinH = 28;
+  private pointerMoveHandler = (p: Phaser.Input.Pointer) => this.onPointerMove(p);
+  private pointerUpHandler = () => this.onPointerUp();
 
   constructor(private scene: Phaser.Scene) {
-    const top = BATTLE_LAYOUT.logTop;
-    const h = BATTLE_LAYOUT.logHeight;
+    this.top = BATTLE_LAYOUT.logTop;
+    this.h = BATTLE_LAYOUT.logHeight;
+    this.trackX = GAME_WIDTH - 14;
+    this.trackTop = this.top + 6;
+    this.trackH = this.h - 12;
 
-    this.scene.add.text(20, top - 18, '전투 로그', {
+    this.scene.add.text(20, this.top - 18, '전투 로그', {
       fontSize: '12px',
       color: '#8888aa',
       fontStyle: 'bold',
     });
 
     this.scene.add
-      .rectangle(GAME_WIDTH / 2, top + h / 2, GAME_WIDTH - 24, h, 0x0a0a12, 0.95)
+      .rectangle(GAME_WIDTH / 2, this.top + this.h / 2, GAME_WIDTH - 24, this.h, 0x0a0a12, 0.95)
       .setStrokeStyle(1, 0x2a2a44);
 
-    this.text = this.scene.add
-      .text(24, top + 10, '', {
-        fontFamily: 'monospace',
-        fontSize: '10px',
-        color: '#aaaacc',
-        lineSpacing: 5,
-        wordWrap: { width: GAME_WIDTH - 48 },
-      })
-      .setOrigin(0, 0);
+    this.scrollTrack = this.scene.add
+      .rectangle(this.trackX, this.trackTop + this.trackH / 2, this.thumbW, this.trackH, 0x2a2a40, 0.9);
+
+    this.scrollThumb = this.scene.add
+      .rectangle(this.trackX, this.trackTop + this.thumbMinH / 2, this.thumbW, this.thumbMinH, 0x7c5cff, 0.85)
+      .setInteractive({ useHandCursor: true });
+
+    this.scrollThumb.on('pointerdown', (p: Phaser.Input.Pointer) => {
+      this.thumbDragStart = { y: p.y, offset: this.scrollOffset };
+      this.stickToBottom = false;
+    });
+
+    this.maskShape = this.scene.add
+      .rectangle(GAME_WIDTH / 2, this.top + this.h / 2, GAME_WIDTH - 28, this.h - 12, 0xffffff, 0)
+      .setVisible(false);
+    const mask = this.maskShape.createGeometryMask();
+
+    this.scrollRoot = this.scene.add.container(this.padX, this.top + 8);
+    this.scrollRoot.setMask(mask);
+
+    this.text = this.scene.add.text(0, 0, '', {
+      fontFamily: 'monospace',
+      fontSize: '10px',
+      color: '#aaaacc',
+      lineSpacing: 5,
+      wordWrap: { width: GAME_WIDTH - 56 },
+    });
+    this.scrollRoot.add(this.text);
+
+    this.scrollZone = this.scene.add
+      .rectangle(GAME_WIDTH / 2 - 8, this.top + this.h / 2, GAME_WIDTH - 36, this.h, 0x000000, 0)
+      .setInteractive({ useHandCursor: true });
+
+    this.scrollZone.on('pointerdown', (p: Phaser.Input.Pointer) => {
+      this.scrollDragStart = { y: p.y, offset: this.scrollOffset };
+      this.stickToBottom = false;
+    });
+
+    this.scene.input.on('pointermove', this.pointerMoveHandler);
+    this.scene.input.on('pointerup', this.pointerUpHandler);
+  }
+
+  destroy(): void {
+    this.scene.input.off('pointermove', this.pointerMoveHandler);
+    this.scene.input.off('pointerup', this.pointerUpHandler);
+    this.scrollRoot?.destroy();
+    this.maskShape?.destroy();
+    this.scrollZone?.destroy();
+    this.scrollTrack?.destroy();
+    this.scrollThumb?.destroy();
+  }
+
+  private onPointerMove(p: Phaser.Input.Pointer): void {
+    if (this.thumbDragStart && this.maxScroll > 0) {
+      const trackRange = this.trackH - this.scrollThumb.height;
+      const dy = p.y - this.thumbDragStart.y;
+      const ratio = trackRange > 0 ? dy / trackRange : 0;
+      this.setScroll(this.thumbDragStart.offset + ratio * this.maxScroll);
+      return;
+    }
+    if (!this.scrollDragStart || this.maxScroll <= 0) return;
+    const dy = p.y - this.scrollDragStart.y;
+    this.setScroll(this.scrollDragStart.offset - dy);
+  }
+
+  private onPointerUp(): void {
+    this.scrollDragStart = null;
+    this.thumbDragStart = null;
+  }
+
+  private setScroll(offset: number): void {
+    this.scrollOffset = Phaser.Math.Clamp(offset, 0, this.maxScroll);
+    this.text.setY(-this.scrollOffset);
+    this.updateScrollbar();
+  }
+
+  private updateScrollbar(): void {
+    if (this.maxScroll <= 0) {
+      this.scrollTrack.setVisible(false);
+      this.scrollThumb.setVisible(false);
+      return;
+    }
+    this.scrollTrack.setVisible(true);
+    this.scrollThumb.setVisible(true);
+
+    const visible = this.h - 16;
+    const contentH = this.text.height;
+    const thumbH = Math.max(this.thumbMinH, (visible / contentH) * this.trackH);
+    const trackRange = this.trackH - thumbH;
+    const ratio = this.maxScroll > 0 ? this.scrollOffset / this.maxScroll : 0;
+    const thumbY = this.trackTop + thumbH / 2 + ratio * trackRange;
+
+    this.scrollThumb.setSize(this.thumbW, thumbH);
+    this.scrollThumb.setY(thumbY);
+  }
+
+  private refreshScrollBounds(): void {
+    const visible = this.h - 16;
+    this.maxScroll = Math.max(0, this.text.height - visible);
+    if (this.stickToBottom) {
+      this.setScroll(this.maxScroll);
+    } else {
+      this.setScroll(this.scrollOffset);
+    }
   }
 
   append(ev: BattlePlaybackEvent): void {
@@ -390,8 +508,19 @@ export class AutoBattleLog {
       ev.phase === 'enemy' ? '🔴' : ev.kind === 'card' ? '🃏' : ev.kind === 'damage' ? '💥' : '▸';
     const line = `[T${ev.turn || '-'}] ${prefix} ${ev.text}`;
     this.lines.push(line);
-    if (this.lines.length > 16) this.lines.shift();
     this.text.setText(this.lines.join('\n'));
+    this.refreshScrollBounds();
+  }
+
+  appendAll(events: BattlePlaybackEvent[]): void {
+    for (const ev of events) {
+      const prefix =
+        ev.phase === 'enemy' ? '🔴' : ev.kind === 'card' ? '🃏' : ev.kind === 'damage' ? '💥' : '▸';
+      this.lines.push(`[T${ev.turn || '-'}] ${prefix} ${ev.text}`);
+    }
+    this.text.setText(this.lines.join('\n'));
+    this.stickToBottom = false;
+    this.refreshScrollBounds();
   }
 }
 

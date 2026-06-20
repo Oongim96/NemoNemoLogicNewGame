@@ -44,10 +44,16 @@ HubScene
 
 ## 맵
 
-- 그림(스테이지)별 `mapSize` 고정: 슬라임 숲 **1×1** → 고대 용 **2×2** → 용의 전설 **3×3** (`modules/meta/domain/picture-stages.data.ts`)
-- **예시** `demo_ink_slime`: **2×2 구역**, 구역당 **5×5** 퍼즐 → 완성 **10×10** (`puzzle-sets/slime-10x10.data.ts`)
-- `registry.currentPicture.puzzleSetId` — 퍼즐 데이터 선택
-- 구역당 퍼즐 3×3 (데모), `section-puzzles.data.ts`
+**완성 그림 한 변 = `mapSize × puzzleSize`** (스테이지마다 `computePictureSize`로 계산)
+
+| 스테이지 | mapSize | puzzleSize | 완성 |
+| --- | --- | --- | --- |
+| 잉크 슬라임 (예시) | 5×5 | 10×10 | **50×50** |
+| 슬라임 숲 (튜토) | 1×1 | 10×10 | 10×10 |
+| 고대 용 | 2×2 | 3×3 | **6×6** |
+| 용의 전설 | 3×3 | 3×3 | 9×9 |
+
+- `registry.currentPicture.puzzleSetId` — 퍼즐 세트 선택 (`puzzle-set.registry`)
 - 완료 구역: 퍼즐 solution 픽셀을 큰 그림 조각으로 표시
 
 ## 퍼즐

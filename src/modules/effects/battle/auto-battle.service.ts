@@ -14,6 +14,8 @@ export interface AutoBattleInput {
   modifiers: PuzzleRunModifiers;
   carryover: PuzzleRunCarryover;
   enemyHp?: number;
+  /** 덱 인덱스 순 — 배치 슬롯 순서대로 턴 합산·발동 */
+  formationOrder?: number[];
 }
 
 export function prepareBattleState(input: AutoBattleInput): {
@@ -27,7 +29,13 @@ export function prepareBattleState(input: AutoBattleInput): {
   const inkSeed = input.carryover.inkStackSeed + input.carryover.attackStackBonus;
 
   const instances = createBattleInstances(input.deck.getAll());
-  for (const inst of instances) {
+  const order = input.formationOrder;
+  const ordered =
+    order && order.length === instances.length
+      ? order.map((i) => instances[i]!)
+      : instances;
+
+  for (const inst of ordered) {
     if (inst.card.conceptPrimary === '잉크' && deckMods.inkCardCooldownReduce > 0) {
       inst.cooldown = 0;
       inst.card = {
@@ -37,7 +45,7 @@ export function prepareBattleState(input: AutoBattleInput): {
     }
   }
 
-  const state = new BattleState(instances, {
+  const state = new BattleState(ordered, {
     enemyHp: input.enemyHp ?? 2800,
     inkSeed,
     inkMaxBonus,

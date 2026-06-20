@@ -1,7 +1,7 @@
 import type { PuzzleSet } from '@modules/puzzle/domain/puzzle-sets/puzzle-set.types';
 import type { SectionPuzzleData } from '@modules/puzzle/domain/puzzle.types';
 
-/** 3×3 맵 — 구역당 3×3. 합치면 9×9 용 실루엣 */
+/** 3×3 맵 · 구역당 3×3 → 완성 9×9 (스테이지 mapSize에 따라 일부 구역만 플레이 가능) */
 const SOLUTIONS: number[][][] = [
   [
     [1, 1, 0],
