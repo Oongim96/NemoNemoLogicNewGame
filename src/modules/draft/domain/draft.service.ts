@@ -233,3 +233,8 @@ export function shopPrice(card: InkCard): number {
   const base = { common: 12, rare: 22, epic: 40 } satisfies Record<CardGrade, number>;
   return base[card.grade];
 }
+
+/** 상점 판매가 — 구매가의 50% */
+export function sellPrice(card: InkCard): number {
+  return Math.max(4, Math.floor(shopPrice(card) * 0.5));
+}

@@ -23,8 +23,12 @@
 ## 규칙
 
 1. **런 시작** `generateRunSectionAssignments()` — 구역마다 category 배정
-2. **2×2 이상** (`mapGridSize >= 2` && `sectionCount >= 4`): **shop 최소 1구역** 강제
+2. **2×2 이상** (`mapGridSize >= 2` && `sectionCount >= 4`):
+   - **shop 최소 1구역** 강제
+   - **draft(🃏 3택1) 최소 2구역** 강제 (이벤트 구역에서 치환, 상점 구역은 유지)
 3. draft의 `goldAmount`는 배정 시 확정; event는 `resolveSectionReward()` 시 1회 롤·캐시
+
+구현: `getMinDraftSections()`, `ensureMinDraftSections()` — `reward-roll.service.ts`
 
 ## UI
 

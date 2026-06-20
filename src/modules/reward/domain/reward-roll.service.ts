@@ -49,6 +49,33 @@ export function requiresGuaranteedShop(mapGridSize: number, sectionCount: number
   return mapGridSize >= 2 && sectionCount >= 4;
 }
 
+/** 2×2 이상(구역 4개+): 3택1 최소 구역 수 */
+export function getMinDraftSections(mapGridSize: number, sectionCount: number): number {
+  if (mapGridSize >= 2 && sectionCount >= 4) return 2;
+  return 0;
+}
+
+function ensureMinDraftSections(
+  assignments: SectionAssignment[],
+  minDrafts: number,
+  rng: () => number,
+): void {
+  let draftCount = assignments.filter((a) => a.category === 'draft').length;
+  if (draftCount >= minDrafts) return;
+
+  while (draftCount < minDrafts) {
+    const candidates = assignments
+      .map((a, i) => ({ assignment: a, index: i }))
+      .filter(({ assignment }) => assignment.category !== 'draft' && assignment.category !== 'shop');
+
+    if (candidates.length === 0) break;
+
+    const pick = candidates[Math.floor(rng() * candidates.length)];
+    assignments[pick.index] = { category: 'draft', draftReward: rollDraftReward(rng) };
+    draftCount++;
+  }
+}
+
 export function generateRunSectionAssignments(
   sectionCount: number,
   mapGridSize: number,
@@ -69,6 +96,8 @@ export function generateRunSectionAssignments(
     const idx = Math.floor(rng() * sectionCount);
     assignments[idx] = { category: 'shop' };
   }
+
+  ensureMinDraftSections(assignments, getMinDraftSections(mapGridSize, sectionCount), rng);
 
   return assignments;
 }

@@ -11,6 +11,8 @@
 | [03-draft.md](./03-draft.md) | 3택1 가중치·파티 시너지 | `draft`, `party`, `card` |
 | [04-data-pipeline.md](./04-data-pipeline.md) | CSV→JSON·카드 데이터 | `card`, `content-source/`, `scripts/` |
 | [05-assets.md](./05-assets.md) | 에셋 팩·CDN·원격 다운로드 | `asset`, `public/assets/` |
+| [06-effects.md](./06-effects.md) | 카드·캐릭터·컨셉 효과·자동전투 | `effects`, `PuzzleScene`, `AutoBattleScene` |
+| [07-gacha.md](./07-gacha.md) | 가챠 · 캐릭+카드 · 중복 환급 | `gacha`, `GachaScene` |
 
 ## 기획 문서와의 관계
 

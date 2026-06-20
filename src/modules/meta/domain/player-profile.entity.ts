@@ -1,22 +1,27 @@
 import type { PartyConfig } from '@modules/party';
 import {
-  CHARACTER_ROSTER,
-  characterToPartyMember,
-  getCharacterDef,
-} from '@modules/meta/domain/character-roster.data';
+  executeGachaPull,
+  GACHA_COST_SINGLE,
+  GACHA_COST_TEN,
+  type GachaPullResult,
+} from '@modules/gacha';
+import { characterToPartyMember, getCharacterDef } from '@modules/meta/domain/character-roster.data';
 import { DEFAULT_SETTINGS, type GameSettings } from '@modules/meta/domain/settings.types';
 
-const DEFAULT_OWNED_CHARACTERS = ['char_luna', 'char_brix', 'char_mio', 'char_sera'];
-const DEFAULT_OWNED_CARDS = ['start_001', 'start_002', 'ink_001', 'moon_001', 'wall_001', 'luck_001'];
-const DEFAULT_PARTY = ['char_luna', 'char_brix', 'char_mio', 'char_sera'];
+/** 기본 SR 1인 + 스타터 — 나머지는 가챠 */
+const DEFAULT_OWNED_CHARACTERS = ['char_sera'];
+const DEFAULT_OWNED_CARDS = ['start_001', 'start_002', 'ink_001', 'ink_002'];
+const DEFAULT_SELECTED = 'char_sera';
 
 export class PlayerProfile {
   private displayName = '모험가';
+  private level = 1;
+  private gold = 710;
   private loggedIn = false;
   private ownedCharacterIds = new Set<string>(DEFAULT_OWNED_CHARACTERS);
   private ownedCardIds = new Set<string>(DEFAULT_OWNED_CARDS);
-  private partyMemberIds: string[] = [...DEFAULT_PARTY];
-  private gems = 1600;
+  private selectedCharacterId = DEFAULT_SELECTED;
+  private gems = 4900;
   private settings: GameSettings = { ...DEFAULT_SETTINGS };
 
   static createDefault(): PlayerProfile {
@@ -34,6 +39,14 @@ export class PlayerProfile {
 
   getDisplayName(): string {
     return this.displayName;
+  }
+
+  getLevel(): number {
+    return this.level;
+  }
+
+  getGold(): number {
+    return this.gold;
   }
 
   getGems(): number {
@@ -66,6 +79,32 @@ export class PlayerProfile {
     return [...this.ownedCardIds];
   }
 
+  getSelectedCharacterId(): string {
+    return this.selectedCharacterId;
+  }
+
+  setSelectedCharacter(id: string): void {
+    if (!this.ownsCharacter(id)) return;
+    this.selectedCharacterId = id;
+  }
+
+  getPartyConfig(): PartyConfig {
+    const def = getCharacterDef(this.selectedCharacterId);
+    if (!def) {
+      const fallback = getCharacterDef(DEFAULT_SELECTED)!;
+      return { members: [characterToPartyMember(fallback)] };
+    }
+    return { members: [characterToPartyMember(def)] };
+  }
+
+  getSettings(): Readonly<GameSettings> {
+    return this.settings;
+  }
+
+  updateSettings(partial: Partial<GameSettings>): void {
+    this.settings = { ...this.settings, ...partial };
+  }
+
   addCharacter(id: string): void {
     this.ownedCharacterIds.add(id);
     const cardIds = getCharacterDef(id)?.uniqueCardIds ?? [];
@@ -78,77 +117,27 @@ export class PlayerProfile {
     this.ownedCardIds.add(id);
   }
 
-  getPartyMemberIds(): string[] {
-    return [...this.partyMemberIds];
+  addGold(amount: number): void {
+    this.gold += amount;
   }
 
-  setPartySlot(slot: number, characterId: string): void {
-    if (slot < 0 || slot >= 4) return;
-    if (!this.ownsCharacter(characterId)) return;
-    const next = [...this.partyMemberIds];
-    next[slot] = characterId;
-    this.partyMemberIds = next;
+  spendGold(amount: number): boolean {
+    if (this.gold < amount) return false;
+    this.gold -= amount;
+    return true;
   }
 
-  getPartyConfig(): PartyConfig {
-    const members = this.partyMemberIds
-      .map((id) => getCharacterDef(id))
-      .filter((def): def is NonNullable<typeof def> => def != null)
-      .map(characterToPartyMember);
-
-    return { members };
+  pullGacha(): GachaPullResult | null {
+    if (!this.spendGems(GACHA_COST_SINGLE)) return null;
+    return executeGachaPull(this);
   }
 
-  getSettings(): Readonly<GameSettings> {
-    return this.settings;
-  }
+  pullTenGacha(): GachaPullResult[] {
+    if (!this.spendGems(GACHA_COST_TEN)) return [];
 
-  updateSettings(partial: Partial<GameSettings>): void {
-    this.settings = { ...this.settings, ...partial };
-  }
-
-  /** 가챠 1회 롤 (젬 소모 없음) */
-  rollGachaCharacter(): { characterId: string; grade: 'SR' | 'SSR' } | null {
-    const owned = this.getOwnedCharacterIds();
-    const ssrPool = CHARACTER_ROSTER.filter((c) => c.grade === 'SSR' && !owned.includes(c.id));
-    const srPool = CHARACTER_ROSTER.filter((c) => c.grade === 'SR' && !owned.includes(c.id));
-
-    const roll = Math.random();
-    if (roll < 0.15 && ssrPool.length > 0) {
-      const pick = ssrPool[Math.floor(Math.random() * ssrPool.length)];
-      this.addCharacter(pick.id);
-      return { characterId: pick.id, grade: 'SSR' };
-    }
-
-    if (srPool.length > 0) {
-      const pick = srPool[Math.floor(Math.random() * srPool.length)];
-      this.addCharacter(pick.id);
-      return { characterId: pick.id, grade: 'SR' };
-    }
-
-    if (ssrPool.length > 0) {
-      const pick = ssrPool[Math.floor(Math.random() * ssrPool.length)];
-      this.addCharacter(pick.id);
-      return { characterId: pick.id, grade: 'SSR' };
-    }
-
-    this.addGems(30);
-    return null;
-  }
-
-  /** 가챠 1회 — SR 85% / SSR 15% (와이어) */
-  pullGacha(): { characterId: string; grade: 'SR' | 'SSR' } | null {
-    if (!this.spendGems(100)) return null;
-    return this.rollGachaCharacter();
-  }
-
-  pullTenGacha(): { characterId: string; grade: 'SR' | 'SSR' }[] {
-    if (!this.spendGems(900)) return [];
-
-    const results: { characterId: string; grade: 'SR' | 'SSR' }[] = [];
+    const results: GachaPullResult[] = [];
     for (let i = 0; i < 10; i++) {
-      const r = this.rollGachaCharacter();
-      if (r) results.push(r);
+      results.push(executeGachaPull(this));
     }
     return results;
   }

@@ -23,6 +23,8 @@ export class MapScene extends Phaser.Scene {
 
   create(): void {
     const run = this.getRun();
+    const picture = this.registry.get('currentPicture') as { title?: string } | undefined;
+    const stageTitle = picture?.title ?? '고대 용의 그림';
     const mapSize = run.mapSize;
     const sectionCount = run.sectionCount;
     const tileSize = tileSizeForMap(mapSize);
@@ -33,7 +35,7 @@ export class MapScene extends Phaser.Scene {
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, COLORS.background);
 
     this.add
-      .text(GAME_WIDTH / 2, 44, '고대 용의 그림', {
+      .text(GAME_WIDTH / 2, 44, stageTitle, {
         fontFamily: 'sans-serif',
         fontSize: '20px',
         color: '#f0f0f5',
@@ -98,7 +100,8 @@ export class MapScene extends Phaser.Scene {
     run: RunState,
     flash: boolean,
   ): void {
-    const puzzle = getSectionPuzzle(sectionIndex);
+    const puzzleSetId = this.getPuzzleSetId();
+    const puzzle = getSectionPuzzle(sectionIndex, puzzleSetId);
     const x = mapOriginX + col * (tileSize + MAP_GAP) + tileSize / 2;
     const y = mapTop + row * (tileSize + MAP_GAP) + tileSize / 2;
     const completed = run.getSectionStatus(sectionIndex) === 'completed';
@@ -183,6 +186,11 @@ export class MapScene extends Phaser.Scene {
         );
       }
     }
+  }
+
+  private getPuzzleSetId(): string {
+    const picture = this.registry.get('currentPicture') as { puzzleSetId?: string } | undefined;
+    return picture?.puzzleSetId ?? 'dragon_3x3';
   }
 
   private getRun(): RunState {

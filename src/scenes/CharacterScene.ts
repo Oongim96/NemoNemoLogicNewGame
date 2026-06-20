@@ -17,6 +17,14 @@ export class CharacterScene extends Phaser.Scene {
     this.profile = this.registry.get('playerProfile') as PlayerProfile;
     drawMobileShell(this, '캐릭터', 'characters');
 
+    this.add
+      .text(GAME_WIDTH / 2, LAYOUT.CONTENT_TOP - 8, '탭하여 출전 캐릭터 변경', {
+        fontFamily: 'sans-serif',
+        fontSize: '11px',
+        color: '#8888aa',
+      })
+      .setOrigin(0.5);
+
     this.listContainer = this.add.container(0, 0);
     this.renderList();
   }
@@ -36,21 +44,24 @@ export class CharacterScene extends Phaser.Scene {
       return a.grade.localeCompare(b.grade);
     });
 
-    let y = LAYOUT.CONTENT_TOP + 8;
+    let y = LAYOUT.CONTENT_TOP + 20;
     const rowW = GAME_WIDTH - 24;
+    const selectedId = this.profile.getSelectedCharacterId();
 
     for (const ch of sorted) {
       if (y > LAYOUT.CONTENT_BOTTOM - 16) break;
 
       const isOwned = owned.has(ch.id);
+      const isSelected = ch.id === selectedId;
       const row = this.add
-        .rectangle(GAME_WIDTH / 2, y, rowW, 64, isOwned ? 0x242438 : 0x14141f)
-        .setStrokeStyle(1, isOwned ? COLORS.accent : 0x333344)
+        .rectangle(GAME_WIDTH / 2, y, rowW, 64, isSelected ? 0x32324a : isOwned ? 0x242438 : 0x14141f)
+        .setStrokeStyle(isSelected ? 2 : 1, isSelected ? 0xf5c842 : isOwned ? COLORS.accent : 0x333344)
         .setInteractive({ useHandCursor: isOwned });
 
       const badge = ch.grade === 'SSR' ? '★ SSR' : '◆ SR';
+      const prefix = isSelected ? '⚔ ' : isOwned ? '' : '🔒 ';
       const name = this.add
-        .text(20, y - 12, `${isOwned ? '' : '🔒 '}${ch.name}`, {
+        .text(20, y - 12, `${prefix}${ch.name}`, {
           fontFamily: 'sans-serif',
           fontSize: '16px',
           color: isOwned ? '#f0f0f5' : '#555566',
@@ -67,7 +78,23 @@ export class CharacterScene extends Phaser.Scene {
         .setOrigin(0, 0.5);
 
       if (isOwned) {
-        row.on('pointerdown', () => this.showDetail(ch.id));
+        row.on('pointerdown', () => {
+          this.profile.setSelectedCharacter(ch.id);
+          this.renderList();
+        });
+
+        const info = this.add
+          .text(GAME_WIDTH - 36, y, 'ⓘ', {
+            fontSize: '18px',
+            color: '#8888aa',
+          })
+          .setOrigin(0.5)
+          .setInteractive({ useHandCursor: true });
+        info.on('pointerdown', (p: Phaser.Input.Pointer) => {
+          p.event.stopPropagation();
+          this.showDetail(ch.id);
+        });
+        this.listContainer.add(info);
       }
 
       this.listContainer.add([row, name, meta]);

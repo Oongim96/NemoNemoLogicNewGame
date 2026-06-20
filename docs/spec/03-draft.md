@@ -38,6 +38,7 @@ weight = draft_weight × partyConceptMult × uniqueEarlyMult × varietyMult
 
 - `pickShopOffers()` — 동일 가중 풀에서 3장
 - 가격: common 12, rare 22, epic 40
+- **판매**: `sellPrice()` — 구매가의 50% (UI **판매** 탭)
 
 ## 코드
 

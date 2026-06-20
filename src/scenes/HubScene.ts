@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_WIDTH, LAYOUT } from '@app/game.config';
-import type { PlayerProfile } from '@modules/meta';
-import { drawMobileShell } from '@ui/mobile-shell';
+import { COLORS, GAME_HEIGHT, GAME_WIDTH, LAYOUT } from '@app/game.config';
+import { getCharacterDef, type PlayerProfile } from '@modules/meta';
+import { drawBattleStartButton, drawLobbyShell } from '@ui/mobile-shell';
 
 export class HubScene extends Phaser.Scene {
   constructor() {
@@ -10,112 +10,57 @@ export class HubScene extends Phaser.Scene {
 
   create(): void {
     const profile = this.registry.get('playerProfile') as PlayerProfile;
-    const party = profile.getPartyConfig();
-    const contentBottom = LAYOUT.CONTENT_BOTTOM;
+    const char = getCharacterDef(profile.getSelectedCharacterId());
 
-    drawMobileShell(this, '픽셀 던전', 'home');
+    drawLobbyShell(this);
 
-    // 메인 비주얼 영역
-    const heroY = LAYOUT.CONTENT_TOP + 100;
+    // 숲 배경 느낌 (와이어)
+    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT * 0.42, GAME_WIDTH, GAME_HEIGHT * 0.55, 0x1a2e1a, 0.4);
+
+    // 출전 캐릭터 (크게)
+    const heroY = GAME_HEIGHT * 0.38;
+    const portraitR = 72;
+    const gradeColor = char?.grade === 'SSR' ? 0xffd700 : 0x9b7fff;
+
+    this.add.circle(GAME_WIDTH / 2, heroY, portraitR + 8, 0x000000, 0.3);
+    this.add.circle(GAME_WIDTH / 2, heroY, portraitR, COLORS.panel).setStrokeStyle(4, gradeColor);
+    const portraitHit = this.add
+      .circle(GAME_WIDTH / 2, heroY, portraitR + 8, 0x000000, 0)
+      .setInteractive({ useHandCursor: true });
+    portraitHit.on('pointerdown', () => this.scene.start('CharacterScene'));
     this.add
-      .rectangle(GAME_WIDTH / 2, heroY, GAME_WIDTH - 32, 200, 0x14141f)
-      .setStrokeStyle(2, 0x2a2a3e);
-
-    this.add
-      .text(GAME_WIDTH / 2, heroY - 60, '🐉', { fontSize: '48px' })
+      .text(GAME_WIDTH / 2, heroY - 8, char?.primaryConcept === '잉크' ? '🖌' : '✨', { fontSize: '56px' })
       .setOrigin(0.5);
 
     this.add
-      .text(GAME_WIDTH / 2, heroY - 10, '고대 용의 그림', {
+      .text(GAME_WIDTH / 2, heroY + portraitR + 20, char?.name ?? '???', {
         fontFamily: 'sans-serif',
-        fontSize: '18px',
+        fontSize: '22px',
         color: '#f0f0f5',
         fontStyle: 'bold',
       })
       .setOrigin(0.5);
 
     this.add
-      .text(GAME_WIDTH / 2, heroY + 18, '네모네모로 밝히고 · 잉크 덱을 쌓아라', {
+      .text(GAME_WIDTH / 2, heroY + portraitR + 46, `${char?.grade ?? 'SR'} · ${char?.primaryConcept ?? ''} · ${char?.tagline ?? ''}`, {
         fontFamily: 'sans-serif',
         fontSize: '12px',
         color: '#8888aa',
       })
       .setOrigin(0.5);
 
-    // 파티 미니 슬롯
-    const slotY = heroY + 58;
-    const slotW = (GAME_WIDTH - 48 - 24) / 4;
-    party.members.forEach((m, i) => {
-      const x = 24 + i * (slotW + 8) + slotW / 2;
-      this.add.rectangle(x, slotY, slotW, 44, 0x242438).setStrokeStyle(1, COLORS.accent);
-      this.add
-        .text(x, slotY - 6, m.name.slice(0, 2), {
-          fontFamily: 'sans-serif',
-          fontSize: '14px',
-          color: '#f0f0f5',
-          fontStyle: 'bold',
-        })
-        .setOrigin(0.5);
-      this.add
-        .text(x, slotY + 12, m.primaryConcept, {
-          fontFamily: 'sans-serif',
-          fontSize: '9px',
-          color: '#8888aa',
-        })
-        .setOrigin(0.5);
-    });
-
-    // 플레이 버튼
-    const playY = heroY + 150;
-    const playBtn = this.add
-      .rectangle(GAME_WIDTH / 2, playY, GAME_WIDTH - 48, 56, COLORS.accent)
-      .setInteractive({ useHandCursor: true });
-
     this.add
-      .text(GAME_WIDTH / 2, playY, '▶  게임 시작', {
-        fontFamily: 'sans-serif',
-        fontSize: '20px',
-        color: '#ffffff',
-        fontStyle: 'bold',
-      })
-      .setOrigin(0.5);
-
-    playBtn.on('pointerover', () => playBtn.setFillStyle(0x9b7fff));
-    playBtn.on('pointerout', () => playBtn.setFillStyle(COLORS.accent));
-    playBtn.on('pointerdown', () => this.scene.start('DifficultySelectScene'));
-
-    // 서브 메뉴
-    const subY = playY + 56;
-    const teamBtn = this.add
-      .rectangle(GAME_WIDTH / 2 - 80, subY, 140, 40, COLORS.panel)
-      .setStrokeStyle(1, 0x555566)
-      .setInteractive({ useHandCursor: true });
-    this.add
-      .text(GAME_WIDTH / 2 - 80, subY, '팀 편성', {
-        fontFamily: 'sans-serif',
-        fontSize: '13px',
-        color: '#f0f0f5',
-      })
-      .setOrigin(0.5);
-    teamBtn.on('pointerdown', () => this.scene.start('TeamScene'));
-
-    this.add
-      .rectangle(GAME_WIDTH / 2 + 80, subY, 140, 40, COLORS.panel)
-      .setStrokeStyle(1, 0x555566);
-    this.add
-      .text(GAME_WIDTH / 2 + 80, subY, '이벤트', {
-        fontFamily: 'sans-serif',
-        fontSize: '13px',
-        color: '#8888aa',
-      })
-      .setOrigin(0.5);
-
-    // 공지
-    this.add
-      .text(20, contentBottom - 80, '📢 튜토리얼 1×1부터 시작 · 가챠로 SSR 수집', {
+      .text(GAME_WIDTH / 2, heroY + portraitR + 68, '캐릭 탭에서 출전 변경', {
         fontFamily: 'sans-serif',
         fontSize: '11px',
         color: '#555566',
-      });
+      })
+      .setOrigin(0.5);
+
+    // 전투 시작 — 중앙 하단 (네비 위)
+    const playY = LAYOUT.CONTENT_BOTTOM - 56;
+    drawBattleStartButton(this, playY, '⚔  전투 시작', () => {
+      this.scene.start('StageSelectScene');
+    });
   }
 }

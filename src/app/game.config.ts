@@ -4,7 +4,7 @@ export const GAME_HEIGHT = 844;
 
 export const LAYOUT = {
   TOP_BAR: 52,
-  BOTTOM_NAV: 68,
+  BOTTOM_NAV: 76,
   SAFE_TOP: 8,
   CONTENT_TOP: 60,
   get CONTENT_BOTTOM(): number {

@@ -15,6 +15,8 @@ export {
 export { GAME_EVENTS } from '@modules/reward/domain/game-events.data';
 export {
   generateRunSectionAssignments,
+  getMinDraftSections,
+  requiresGuaranteedShop,
   resolveSectionReward,
   rollEventBucketReward,
 } from '@modules/reward/domain/reward-roll.service';
