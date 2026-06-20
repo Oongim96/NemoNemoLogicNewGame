@@ -210,19 +210,4 @@ export const CARD_GRADE_KO: Record<string, string> = {
   epic: '에픽',
 };
 
-export const PUZZLE_TRIGGER_KO: Record<string, string> = {
-  on_cell_correct: '칸 정답',
-  on_line_complete: '줄 완성',
-  on_mistake: '실수',
-  on_section_complete: '구역 완료',
-  on_combo: '콤보',
-  passive: '패시브',
-};
-
-export const BATTLE_TYPE_KO: Record<string, string> = {
-  attack: '공격',
-  buff: '버프',
-  shield: '실드',
-  stack: '스택',
-  special: '특수',
-};
+export { BATTLE_TYPE_KO, PUZZLE_TRIGGER_KO } from '@modules/card';

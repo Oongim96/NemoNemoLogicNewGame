@@ -1,6 +1,6 @@
 import type { ConceptThreshold, InkCard } from '@modules/card/domain/card.types';
 import { cardRepository } from '@modules/card/infrastructure/card.repository';
-import { BATTLE_TYPE_KO } from '@ui/collection-detail-overlay';
+import { BATTLE_TYPE_KO } from '@modules/card';
 
 export interface CardEffectSplit {
   puzzle: string;

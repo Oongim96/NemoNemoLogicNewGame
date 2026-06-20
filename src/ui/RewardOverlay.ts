@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { DRAFT_BONUS_GOLD, GAME_EVENTS, REWARD_LABELS, type SectionReward } from '@modules/reward';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '@app/game.config';
 import { getDraftBadge, openDraft, pickShopOffers, sellPrice, shopPrice } from '@modules/draft';
-import { cardRepository, type InkCard } from '@modules/card';
+import { buildCardStrategyTags, cardRepository, type InkCard } from '@modules/card';
 import type { RunState } from '@modules/run';
 import {
   draftRowHeight,
@@ -192,7 +192,7 @@ export class RewardOverlay {
       .setOrigin(0, 0.5);
 
     const meta = this.scene.add
-      .text(left, y - height / 2 + 38, `${card.conceptPrimary} · ${card.grade}`, {
+      .text(left, y - height / 2 + 38, `${card.conceptPrimary} · ${buildCardStrategyTags(card).join(' · ')}`, {
         fontFamily: 'sans-serif',
         fontSize: '11px',
         color: gradeColor,
@@ -406,7 +406,7 @@ export class RewardOverlay {
         .setOrigin(0, 0.5);
 
       const meta = this.scene.add
-        .text(left, y + 10, `${card.conceptPrimary} · ${card.grade}`, {
+        .text(left, y + 10, `${card.conceptPrimary} · ${buildCardStrategyTags(card).join(' · ')}`, {
           fontFamily: 'sans-serif',
           fontSize: '11px',
           color: GRADE_COLOR[card.grade] ?? '#aaa',

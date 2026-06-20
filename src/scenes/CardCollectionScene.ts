@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { cardRepository } from '@modules/card';
+import { buildCardStrategyTags, cardRepository } from '@modules/card';
 import { COLORS, GAME_WIDTH, LAYOUT } from '@app/game.config';
 import type { PlayerProfile } from '@modules/meta';
 import { drawMobileShell } from '@ui/mobile-shell';
@@ -137,7 +137,7 @@ export class CardCollectionScene extends Phaser.Scene {
       },
       title: isOwned ? card.name : '???',
       subtitle: isOwned ? conceptLine : '미획득',
-      chips: isOwned ? [gradeLabel, card.conceptPrimary] : [gradeLabel],
+      chips: buildCardStrategyTags(card),
       borderColor: isOwned ? borderColor : 0x444455,
       sections,
     });
