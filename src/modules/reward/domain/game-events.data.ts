@@ -14,6 +14,6 @@ export const GAME_EVENTS: GameEvent[] = [
   {
     id: 'whisper_curse',
     title: '저주의 속삭임',
-    description: '어둠이 스쳐 지나간다. 실수 +1',
+    description: '어둠이 스쳐 지나간다.\n퍼즐을 틀린 것과 같이 HP가 1 줄어든다.',
   },
 ];

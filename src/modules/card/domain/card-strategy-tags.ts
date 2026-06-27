@@ -21,7 +21,7 @@ export const PUZZLE_TRIGGER_KO: Record<string, string> = {
   on_line_complete: '줄',
   on_section_complete: '구역',
   on_combo: '콤보',
-  on_mistake: '실수',
+  on_mistake: '오답',
 };
 
 export function isCharacterUniqueCard(cardId: string): boolean {

@@ -47,7 +47,7 @@ export class RunCompleteScene extends Phaser.Scene {
       .text(
         GAME_WIDTH / 2,
         420,
-        `구역 ${sectionCount}/${sectionCount} · 골드 ${gold} · 실수 ${mistakes}`,
+        `구역 ${sectionCount}/${sectionCount} · 골드 ${gold} · 퍼즐 오답 ${mistakes}회`,
         {
           fontFamily: 'sans-serif',
           fontSize: '13px',

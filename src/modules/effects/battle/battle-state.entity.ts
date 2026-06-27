@@ -15,11 +15,20 @@ export class BattleState {
   inkMaxStack = 10;
   shield = 0;
   atkBuffPct = 0;
+  /** 변동 — 전투 전체 랜덤 최솟값 보정 */
+  varianceFloor = 0;
+  varianceCeilingPct = 0;
   turn = 0;
   instances: DeckCardInstance[];
   log: { turn: number; phase: 'player' | 'enemy' | 'system'; text: string }[] = [];
 
-  constructor(instances: DeckCardInstance[], options?: { enemyHp?: number; inkSeed?: number; inkMaxBonus?: number }) {
+  constructor(instances: DeckCardInstance[], options?: {
+    enemyHp?: number;
+    inkSeed?: number;
+    inkMaxBonus?: number;
+    varianceFloor?: number;
+    varianceCeilingPct?: number;
+  }) {
     this.instances = instances;
     this.enemyMaxHp = options?.enemyHp ?? 3000;
     this.enemyHp = this.enemyMaxHp;
@@ -27,6 +36,8 @@ export class BattleState {
     this.partyHp = this.partyMaxHp;
     this.inkMaxStack = 10 + (options?.inkMaxBonus ?? 0);
     this.inkStack = Math.min(this.inkMaxStack, options?.inkSeed ?? 0);
+    this.varianceFloor = options?.varianceFloor ?? 0;
+    this.varianceCeilingPct = options?.varianceCeilingPct ?? 0;
   }
 
   addLog(phase: 'player' | 'enemy' | 'system', text: string): void {

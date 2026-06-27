@@ -8,7 +8,8 @@ export type Concept =
   | '행운'
   | '힌트'
   | '격자'
-  | '저주';
+  | '저주'
+  | '변동';
 
 export interface InkCard {
   cardId: string;

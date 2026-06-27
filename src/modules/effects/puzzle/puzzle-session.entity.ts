@@ -13,6 +13,8 @@ export class PuzzleSession {
     this.totalFillCells = countSolutionFillCells(solution);
   }
 
+  comboShield = 0;
+
   markLineResolved(axis: 'row' | 'col', index: number): boolean {
     const key = `${axis}:${index}`;
     if (this.resolvedLines.has(key)) return false;
@@ -27,7 +29,15 @@ export class PuzzleSession {
 
   onMistake(): void {
     this.sectionMistakes++;
+    if (this.comboShield > 0) {
+      this.comboShield--;
+      return;
+    }
     this.comboStreak = 0;
+  }
+
+  grantComboShield(amount: number): void {
+    if (amount > 0) this.comboShield += amount;
   }
 
   /** 90%+ 완성률 — 실수가 채울 칸의 10% 이하 */

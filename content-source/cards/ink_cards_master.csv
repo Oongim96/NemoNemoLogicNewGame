@@ -49,5 +49,13 @@ curse_003,붉은 계약,저주,,rare,attack,2,30,,deal_damage,scale_curse=25;sel
 curse_004,역병 인장,저주,,rare,special,3,0,,plague_transfer,pct=50,on_mistake,curse_from_trap,amount=1,함정도 저주+1(덱5). 역병 이전,55,1,1
 curse_005,필사의 각오,저주,,epic,buff,4,40,,desperate_mode,atk_mult=2;taken_mult=2;hp_below=50,passive,lifesteal_at_curse,stack=3,저주3+: 흡혈20%. HP50%- 필사,28,1,1
 curse_006,탐욕의 대가,저주,,rare,buff,2,40,,add_buff_pct,stat=atk_pct;taken_pct=20,on_cell_correct,curse_stack_add,amount=1,공격+40% 받는+20%(합산). 칸: 저주+1,50,2,1
+var_001,흔들리는 칼날,변동,,common,attack,1,35,95,random_damage,,on_cell_correct,variance_reveal_roll,min=1;max=3,칸 정답: 랜덤 1~3칸 힌트. 전투: 35~95 랜덤 피해,110,2,1
+var_002,불안정 방패,변동,,common,shield,2,20,55,random_shield,,on_line_complete,highlight_line,sec=1,줄 완성: 줄 강조. 전투: 실드 20~55 랜덤,100,2,1
+var_003,요동 각성,변동,,common,buff,2,8,28,random_buff_pct,stat=atk_pct,on_cell_correct,variance_gold_roll,min=2;max=6,칸 정답: 골드 2~6 랜덤. 전투: 공격 8~28% 랜덤,95,2,1
+var_004,안전판,변동,,rare,buff,2,0,,variance_floor_boost,floor=5,passive,variance_floor_puzzle,floor=2,패시브: 랜덤 최소+2. 전투: 턴 최소+5,65,2,1
+var_005,확률의 닻,변동,,rare,special,3,0,,variance_floor_anchor,per_card=3,passive,variance_floor_puzzle,floor=3,덱 변동3+: 최소+5. 앵커 장당+3,55,1,1
+var_006,왜곡 장벽,변동,,rare,shield,3,0,,random_block_roll,chance_min=35;chance_max=75;shield_min=15;shield_max=45,on_mistake,mistake_reduce,amount=1,오답 피해-1. 전투: 랜덤 막기%+실드,60,2,1
+var_007,변동 폭풍,변동,,epic,attack,4,70,160,random_damage,debuff_min=5;debuff_max=20,on_section_complete,reveal_random,cells=5,구역 완료: 랜덤 5칸. 전투: 70~160+약화5~20%,28,1,1
+var_008,변주 주사위,변동,행운,rare,attack,2,45,130,random_damage,luck_floor_per_card=1;luck_floor=4,on_cell_correct,gold_small,amount=2,교차: 행운 장당 최소+4. 45~130 랜덤,50,2,1
 start_001,기본 칠하기,잉크,,common,attack,1,50,,deal_damage,,passive,none,,시작 덱용. 전투: 50,0,1,1
 start_002,기본 방어,철벽,,common,shield,2,25,,add_shield,,passive,none,,시작 덱용. 전투: 실드 25,0,1,1

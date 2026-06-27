@@ -37,6 +37,8 @@ export function resolvePlayerTurn(
       params,
       inkCardsThisTurn: inkTurnCount,
       turn: acc,
+      varianceFloor: 0,
+      varianceCeilingPct: 0,
     });
   }
 

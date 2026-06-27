@@ -25,6 +25,8 @@ export interface PuzzleEffectResult {
   gold: number;
   inkStackDelta: number;
   attackStackDelta: number;
+  /** 실수해도 콤보 유지 (소모형) */
+  comboShieldGrant?: number;
 }
 
 export function emptyPuzzleResult(): PuzzleEffectResult {
@@ -47,6 +49,7 @@ export function mergePuzzleResults(...parts: PuzzleEffectResult[]): PuzzleEffect
     out.gold += p.gold;
     out.inkStackDelta += p.inkStackDelta;
     out.attackStackDelta += p.attackStackDelta;
+    out.comboShieldGrant = (out.comboShieldGrant ?? 0) + (p.comboShieldGrant ?? 0);
     if (p.highlightLine) out.highlightLine = p.highlightLine;
   }
   return out;
@@ -56,6 +59,8 @@ export function mergePuzzleResults(...parts: PuzzleEffectResult[]): PuzzleEffect
 export interface PuzzleRunModifiers {
   mistakeHpReduce: number;
   inkMaxStackBonus: number;
+  /** 변동 — 퍼즐 랜덤 굴림 최솟값 보정 */
+  varianceRollFloor: number;
 }
 
 export interface PuzzleRunCarryover {
@@ -97,6 +102,9 @@ export interface BattleEffectContext {
   params: Record<string, string>;
   inkCardsThisTurn: number;
   turn: TurnAccumulator;
+  /** 전투 시작~종료 랜덤 최솟값 보정 */
+  varianceFloor: number;
+  varianceCeilingPct: number;
 }
 
 /** 한 턴 합산 버퍼 */
@@ -110,6 +118,16 @@ export interface TurnAccumulator {
   splashPct: number;
   aoeMult: number;
   forceExplosion: boolean;
+  /** 변동 — 랜덤 최솟값 추가 보정 (이번 턴) */
+  varianceFloorBonus: number;
+  /** 변동 — 적에게 가하는 추가 피해% (랜덤 디버프 합산) */
+  enemyDebuffPct: number;
+  /** 변동 — 다음 적 공격 막을 확률% (가장 높은 값 사용) */
+  pendingBlockChance: number;
+  /** 변동 턴 임계: 낮은 랜덤 재굴림 횟수 */
+  rerollLowRolls: number;
+  /** 변동 턴 임계: 이번 턴 랜덤 최소=중간값 */
+  midpointFloor: boolean;
   messages: string[];
 }
 
@@ -124,6 +142,11 @@ export function createTurnAccumulator(): TurnAccumulator {
     splashPct: 0,
     aoeMult: 0,
     forceExplosion: false,
+    varianceFloorBonus: 0,
+    enemyDebuffPct: 0,
+    pendingBlockChance: 0,
+    rerollLowRolls: 0,
+    midpointFloor: false,
     messages: [],
   };
 }

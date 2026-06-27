@@ -33,3 +33,7 @@ concept,threshold_type,threshold_count,effect_key,effect_desc
 저주,stack,3,lifesteal,공격 흡혈20%
 저주,turn,2,plague_transfer,저주 절반 적 이전
 저주,deck4_hp50,1,desperate,공격2배/다음 반격2배
+변동,deck,3,variance_floor_plus,랜덤 최솟값 +5
+변동,deck,5,variance_ceiling_plus,랜덤 최댓값 +15%
+변동,turn,3,reroll_bottom,낮은 랜덤 1회 재굴림
+변동,turn,4,midpoint_floor,이번 턴 랜덤 최소=중간값

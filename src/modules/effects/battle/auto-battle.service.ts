@@ -2,6 +2,7 @@ import type { InkDeck } from '@modules/deck';
 import type { PartyConfig } from '@modules/party';
 import type { BattleResult, PuzzleRunCarryover, PuzzleRunModifiers } from '@modules/effects/domain/effect.types';
 import { applyDeckThresholdModifiers } from '@modules/effects/battle/concept-threshold.service';
+import { collectVarianceBattleMods } from '@modules/effects/battle/variance-battle.service';
 import { buildBattlePlayback } from '@modules/effects/battle/battle-playback.service';
 import {
   BattleState,
@@ -25,6 +26,7 @@ export function prepareBattleState(input: AutoBattleInput): {
 } {
   const concept = input.party.members[0]?.primaryConcept ?? '잉크';
   const deckMods = applyDeckThresholdModifiers(input.deck, concept);
+  const varianceMods = collectVarianceBattleMods(input.deck);
   const inkMaxBonus = input.modifiers.inkMaxStackBonus + deckMods.inkMaxBonus;
   const inkSeed = input.carryover.inkStackSeed + input.carryover.attackStackBonus;
 
@@ -49,6 +51,8 @@ export function prepareBattleState(input: AutoBattleInput): {
     enemyHp: input.enemyHp ?? 2800,
     inkSeed,
     inkMaxBonus,
+    varianceFloor: varianceMods.floor,
+    varianceCeilingPct: varianceMods.ceilingPct,
   });
 
   return { state, deck: input.deck, party: input.party };

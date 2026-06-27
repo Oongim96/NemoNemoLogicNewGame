@@ -236,5 +236,33 @@
     "thresholdCount": 1,
     "effectKey": "desperate",
     "effectDesc": "공격2배/다음 반격2배"
+  },
+  {
+    "concept": "변동",
+    "thresholdType": "deck",
+    "thresholdCount": 3,
+    "effectKey": "variance_floor_plus",
+    "effectDesc": "랜덤 최솟값 +5"
+  },
+  {
+    "concept": "변동",
+    "thresholdType": "deck",
+    "thresholdCount": 5,
+    "effectKey": "variance_ceiling_plus",
+    "effectDesc": "랜덤 최댓값 +15%"
+  },
+  {
+    "concept": "변동",
+    "thresholdType": "turn",
+    "thresholdCount": 3,
+    "effectKey": "reroll_bottom",
+    "effectDesc": "낮은 랜덤 1회 재굴림"
+  },
+  {
+    "concept": "변동",
+    "thresholdType": "turn",
+    "thresholdCount": 4,
+    "effectKey": "midpoint_floor",
+    "effectDesc": "이번 턴 랜덤 최소=중간값"
   }
 ]

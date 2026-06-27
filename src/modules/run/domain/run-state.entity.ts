@@ -28,7 +28,7 @@ export class RunState implements RunDraftContext {
   private hp = 10;
   private sectionAssignments: SectionAssignment[];
   private resolvedRewards = new Map<number, SectionReward>();
-  private puzzleModifiers: PuzzleRunModifiers = { mistakeHpReduce: 0, inkMaxStackBonus: 0 };
+  private puzzleModifiers: PuzzleRunModifiers = { mistakeHpReduce: 0, inkMaxStackBonus: 0, varianceRollFloor: 0 };
   private carryover: PuzzleRunCarryover = {
     inkStackSeed: 0,
     attackStackBonus: 0,

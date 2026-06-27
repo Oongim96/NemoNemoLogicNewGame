@@ -189,6 +189,20 @@ export class PuzzleScene extends Phaser.Scene {
       });
 
     this.drawUltButton(run);
+    this.applySectionStartEffects(run);
+  }
+
+  private applySectionStartEffects(run: RunState): void {
+    const fx = firePuzzleEffects({
+      deck: run.getDeck(),
+      party: run.getParty(),
+      trigger: 'on_run_start',
+      solution: this.solution,
+      grid: this.grid,
+      modifiers: run.getPuzzleModifiers(),
+      session: this.session,
+    });
+    this.applyEffectResult(run, fx);
   }
 
   private drawUltButton(run: RunState): void {
@@ -312,7 +326,7 @@ export class PuzzleScene extends Phaser.Scene {
       });
       this.applyEffectResult(run, fx);
       this.refreshHud();
-      this.statusText.setText('오답 — 실수 +1');
+      this.statusText.setText(`틀렸어요 — HP ${run.getHp()}/10`);
       this.releaseInputIfIdle();
       return;
     }
@@ -479,8 +493,39 @@ export class PuzzleScene extends Phaser.Scene {
   private applyEffectResult(run: RunState, fx: PuzzleEffectResult): void {
     if (fx.messages.length > 0) this.showEffect(fx.messages.join(' · '));
     this.applyReveals(fx.reveals);
+    if (fx.comboShieldGrant) this.session.grantComboShield(fx.comboShieldGrant);
+    if (fx.highlightLine) this.flashHighlightLine(fx.highlightLine);
     run.applyPuzzleEffectResult(fx);
     this.refreshHud();
+  }
+
+  private flashHighlightLine(line: { axis: 'row' | 'col'; index: number; durationSec: number }): void {
+    const size = this.solution.length;
+    const tint = 0x6a5acd;
+    const holdMs = Math.min(1200, line.durationSec * 400);
+
+    const cells: { x: number; y: number }[] = [];
+    if (line.axis === 'row') {
+      for (let x = 0; x < size; x++) cells.push({ x, y: line.index });
+    } else {
+      for (let y = 0; y < size; y++) cells.push({ x: line.index, y });
+    }
+
+    for (const { x, y } of cells) {
+      const rect = this.cellRects[y]?.[x];
+      if (!rect) continue;
+      const state = this.grid[y]?.[x];
+      const prevFill =
+        state === 'fill' ? COLORS.cellFill : state === 'mark' ? COLORS.cellMark : COLORS.cellEmpty;
+      rect.setFillStyle(tint);
+      this.time.delayedCall(holdMs, () => {
+        if (this.finished) return;
+        const cur = this.grid[y]?.[x];
+        if (cur === 'fill') rect.setFillStyle(COLORS.cellFill);
+        else if (cur === 'mark') rect.setFillStyle(COLORS.cellMark);
+        else rect.setFillStyle(prevFill);
+      });
+    }
   }
 
   private applyReveals(reveals: PuzzleEffectResult['reveals']): void {

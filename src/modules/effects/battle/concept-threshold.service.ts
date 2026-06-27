@@ -63,7 +63,15 @@ export function applyDeckThresholdModifiers(
 export function applyTurnThresholdToAccumulator(
   concept: Concept,
   turnCount: number,
-  acc: { splashPct: number; forceExplosion: boolean; aoeMult: number; messages: string[] },
+  acc: {
+    splashPct: number;
+    forceExplosion: boolean;
+    aoeMult: number;
+    varianceFloorBonus: number;
+    rerollLowRolls: number;
+    midpointFloor: boolean;
+    messages: string[];
+  },
   thresholds: ActiveThreshold[],
 ): void {
   for (const t of thresholds) {
@@ -78,6 +86,19 @@ export function applyTurnThresholdToAccumulator(
         acc.messages.push('잉크 턴5+: 스택 폭발');
       }
     }
-    // 다른 컨셉은 추후 동일 패턴으로 확장
+    if (concept === '변동') {
+      if (t.effectKey === 'variance_floor_turn' && turnCount >= 3) {
+        acc.varianceFloorBonus += 5;
+        acc.messages.push('변동 턴3+: 랜덤 최소 +5');
+      }
+      if (t.effectKey === 'reroll_bottom' && turnCount >= 3) {
+        acc.rerollLowRolls += 1;
+        acc.messages.push('변동 턴3+: 낮은 랜덤 1회 재굴림');
+      }
+      if (t.effectKey === 'midpoint_floor' && turnCount >= 4) {
+        acc.midpointFloor = true;
+        acc.messages.push('변동 턴4+: 이번 턴 랜덤 최소=중간값');
+      }
+    }
   }
 }

@@ -533,11 +533,31 @@ export class RewardOverlay {
     const event = GAME_EVENTS[Math.floor(Math.random() * GAME_EVENTS.length)];
     this.drawChrome(title, subtitle ?? event.title);
 
+    let outcome = '';
+    if (event.id === 'ink_windfall') {
+      run.addGold(15);
+      outcome = '🪙 골드 +15';
+    } else if (event.id === 'whisper_curse') {
+      const hpBefore = run.getHp();
+      run.addMistake();
+      outcome = `❤ HP ${hpBefore} → ${run.getHp()} (−1)`;
+    } else if (event.id === 'mystery_trade') {
+      const pool = cardRepository.getDraftPool().filter((c) => c.grade === 'common');
+      const card = pool[Math.floor(Math.random() * pool.length)];
+      if (card) {
+        run.getDeck().add(card);
+        run.refreshPuzzleModifiers();
+        outcome = `🃏 ${card.name} 획득`;
+      } else {
+        outcome = '줄 카드가 없어 아무 일도 없었다.';
+      }
+    }
+
     const body = this.scene.add
       .text(
         REWARD_LAYOUT.centerX,
-        REWARD_LAYOUT.contentTop + REWARD_LAYOUT.contentH / 2 - 40,
-        event.description,
+        REWARD_LAYOUT.contentTop + REWARD_LAYOUT.contentH / 2 - 48,
+        `${event.description}\n\n${outcome}`,
         {
           fontFamily: 'sans-serif',
           fontSize: '15px',
@@ -549,15 +569,7 @@ export class RewardOverlay {
       .setOrigin(0.5, 0);
 
     this.container.add(body);
-    this.drawFooter('맵으로', () => {
-      if (event.id === 'ink_windfall') run.addGold(15);
-      if (event.id === 'whisper_curse') run.addMistake();
-      if (event.id === 'mystery_trade') {
-        const pool = cardRepository.getDraftPool().filter((c) => c.grade === 'common');
-        const card = pool[Math.floor(Math.random() * pool.length)];
-        if (card) run.getDeck().add(card);
-      }
-    });
+    this.drawFooter('맵으로');
   }
 
   private showHeal(run: RunState, title: string, subtitle?: string): void {
@@ -583,17 +595,19 @@ export class RewardOverlay {
 
   private showTrap(run: RunState, title: string, subtitle?: string): void {
     this.drawChrome(title, subtitle ?? '함정 발동!');
+    const hpBefore = run.getHp();
     run.addMistake();
 
     const t = this.scene.add
       .text(
         REWARD_LAYOUT.centerX,
         REWARD_LAYOUT.contentTop + REWARD_LAYOUT.contentH / 2,
-        '실수 +1 · HP -1',
+        `함정!\n❤ HP ${hpBefore} → ${run.getHp()} (−1)`,
         {
           fontFamily: 'sans-serif',
-          fontSize: '22px',
+          fontSize: '20px',
           color: '#e85d5d',
+          align: 'center',
         },
       )
       .setOrigin(0.5);

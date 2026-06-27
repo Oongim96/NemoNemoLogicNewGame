@@ -6,6 +6,9 @@ import { parseEffectParams } from '@modules/effects/domain/effect-params';
 import type { PuzzleRunModifiers, PuzzleTrigger } from '@modules/effects/domain/effect.types';
 import { emptyPuzzleResult, mergePuzzleResults } from '@modules/effects/domain/effect.types';
 import {
+  collectVariancePuzzleFloor,
+} from '@modules/effects/battle/variance-battle.service';
+import {
   applyPuzzleEffectKey,
   puzzleEffectModifiesInkMax,
   puzzleEffectModifiesMistakeReduce,
@@ -18,22 +21,40 @@ import {
   getCharacterPassives,
 } from '@modules/effects/character/character-passive.service';
 
-export function collectPassiveModifiers(deck: InkDeck): PuzzleRunModifiers {
-  const mods: PuzzleRunModifiers = { mistakeHpReduce: 0, inkMaxStackBonus: 0 };
-  const inkCount = deck.countByConcept('잉크');
-
-  for (const card of deck.getAll()) {
-    if (card.puzzleTrigger !== 'passive') continue;
-    const params = parseEffectParams(card.puzzleEffectParam);
-    mods.mistakeHpReduce += puzzleEffectModifiesMistakeReduce(card.puzzleEffectKey, params);
-    mods.inkMaxStackBonus += puzzleEffectModifiesInkMax(card.puzzleEffectKey, params, inkCount);
-  }
-
-  return mods;
+export interface StackedPuzzleCard {
+  card: InkCard;
+  stackCount: number;
 }
 
-function cardsForTrigger(deck: InkDeck, trigger: PuzzleTrigger): InkCard[] {
-  return deck.getAll().filter((c) => c.puzzleTrigger === trigger);
+/** 같은 카드Id는 1번만 발동, stackCount로 강화 */
+export function groupDeckCardsById(deck: InkDeck, trigger?: PuzzleTrigger): StackedPuzzleCard[] {
+  const grouped = new Map<string, StackedPuzzleCard>();
+  for (const card of deck.getAll()) {
+    if (trigger != null && card.puzzleTrigger !== trigger) continue;
+    if (card.puzzleEffectKey === 'none' || !card.puzzleEffectKey) continue;
+    const existing = grouped.get(card.cardId);
+    if (existing) {
+      existing.stackCount++;
+    } else {
+      grouped.set(card.cardId, { card, stackCount: 1 });
+    }
+  }
+  return [...grouped.values()];
+}
+
+export function collectPassiveModifiers(deck: InkDeck): PuzzleRunModifiers {
+  const mods: PuzzleRunModifiers = { mistakeHpReduce: 0, inkMaxStackBonus: 0, varianceRollFloor: 0 };
+  const inkCount = deck.countByConcept('잉크');
+
+  for (const { card, stackCount } of groupDeckCardsById(deck, 'passive')) {
+    const params = parseEffectParams(card.puzzleEffectParam);
+    mods.mistakeHpReduce += puzzleEffectModifiesMistakeReduce(card.puzzleEffectKey, params, stackCount);
+    mods.inkMaxStackBonus += puzzleEffectModifiesInkMax(card.puzzleEffectKey, params, inkCount, stackCount);
+  }
+
+  mods.varianceRollFloor = collectVariancePuzzleFloor(deck);
+
+  return mods;
 }
 
 export interface FirePuzzleEffectsInput {
@@ -51,12 +72,22 @@ export interface FirePuzzleEffectsInput {
 export function firePuzzleEffects(input: FirePuzzleEffectsInput) {
   const { deck, party, trigger, solution, grid, modifiers, cell, line, session } = input;
   const inkCount = deck.countByConcept('잉크');
-  const cards = cardsForTrigger(deck, trigger);
+  const stacked = groupDeckCardsById(deck, trigger);
   let result = emptyPuzzleResult();
 
-  for (const card of cards) {
+  for (const { card, stackCount } of stacked) {
     const params = parseEffectParams(card.puzzleEffectParam);
-    const ctx = { card, params, solution, grid, cell, line, modifiers, deckInkCount: inkCount };
+    const ctx = {
+      card,
+      stackCount,
+      params,
+      solution,
+      grid,
+      cell,
+      line,
+      modifiers,
+      deckInkCount: inkCount,
+    };
     result = mergePuzzleResults(result, applyPuzzleEffectKey(card.puzzleEffectKey, ctx));
   }
 
@@ -108,6 +139,7 @@ export function getConceptStarterCards(concept: string): string[] {
     힌트: ['hint_001', 'hint_002'],
     격자: ['grid_001', 'grid_002'],
     저주: ['curse_001', 'curse_002'],
+    변동: ['var_001', 'var_002'],
   };
   return starters[concept] ?? [];
 }

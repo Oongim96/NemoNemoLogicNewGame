@@ -29,7 +29,7 @@ function resolvePlayerTurnEvents(
   deck: InkDeck,
   party: PartyConfig,
   events: BattlePlaybackEvent[],
-): number {
+): { damage: number; blockChance: number } {
   state.turn++;
   state.tickCooldowns();
 
@@ -47,10 +47,13 @@ function resolvePlayerTurnEvents(
   const ready = state.readyInstances();
   const acc = createEmptyTurn();
   const inkTurnCount = countConceptInTurn(ready, '잉크');
+  const varTurnCount = countConceptInTurn(ready, '변동');
 
-  const turnThresholds = getTurnThresholds('잉크', inkTurnCount);
+  const inkTurnThresholds = getTurnThresholds('잉크', inkTurnCount);
+  const varTurnThresholds = getTurnThresholds('변동', varTurnCount);
   const thresholdMsgs: string[] = [];
-  applyTurnThresholdToAccumulator('잉크', inkTurnCount, acc, turnThresholds);
+  applyTurnThresholdToAccumulator('잉크', inkTurnCount, acc, inkTurnThresholds);
+  applyTurnThresholdToAccumulator('변동', varTurnCount, acc, varTurnThresholds);
   for (const msg of acc.messages) thresholdMsgs.push(msg);
   acc.messages = [];
 
@@ -74,6 +77,8 @@ function resolvePlayerTurnEvents(
       params,
       inkCardsThisTurn: inkTurnCount,
       turn: acc,
+      varianceFloor: state.varianceFloor,
+      varianceCeilingPct: state.varianceCeilingPct,
     });
     const cardMsg = acc.messages.slice(msgStart).join(' · ') || inst.card.name;
 
@@ -157,6 +162,18 @@ function resolvePlayerTurnEvents(
     });
   }
 
+  if (acc.enemyDebuffPct > 0 && damage > 0) {
+    const bonus = Math.floor(damage * (acc.enemyDebuffPct / 100));
+    damage += bonus;
+    pushEvent(events, {
+      phase: 'player',
+      turn: state.turn,
+      kind: 'threshold',
+      text: `변동 약화 +${bonus} (${acc.enemyDebuffPct}%)`,
+      value: bonus,
+    });
+  }
+
   state.enemyHp = Math.max(0, state.enemyHp - damage);
 
   if (acc.shieldGain > 0) state.shield += acc.shieldGain;
@@ -206,17 +223,48 @@ function resolvePlayerTurnEvents(
     });
   }
 
-  return damage;
+  return { damage, blockChance: acc.pendingBlockChance };
 }
 
-function resolveEnemyTurnEvents(state: BattleState, events: BattlePlaybackEvent[]): void {
-  const dmg = ENEMY_ATTACK;
-  state.partyHp = Math.max(0, state.partyHp - dmg);
+function resolveEnemyTurnEvents(state: BattleState, events: BattlePlaybackEvent[], blockChance: number): void {
+  let dmg = ENEMY_ATTACK;
+
+  if (blockChance > 0 && Math.random() * 100 < blockChance) {
+    pushEvent(events, {
+      phase: 'enemy',
+      turn: state.turn,
+      kind: 'threshold',
+      text: `🎲 막기 성공! (${Math.round(blockChance)}%)`,
+      partyHp: state.partyHp,
+      enemyHp: state.enemyHp,
+    });
+    dmg = 0;
+  }
+
+  if (dmg > 0 && state.shield > 0) {
+    const absorbed = Math.min(state.shield, dmg);
+    state.shield -= absorbed;
+    dmg -= absorbed;
+    if (absorbed > 0) {
+      pushEvent(events, {
+        phase: 'enemy',
+        turn: state.turn,
+        kind: 'threshold',
+        text: `실드 ${absorbed} 흡수`,
+        partyHp: state.partyHp,
+      });
+    }
+  }
+
+  if (dmg > 0) {
+    state.partyHp = Math.max(0, state.partyHp - dmg);
+  }
+
   pushEvent(events, {
     phase: 'enemy',
     turn: state.turn,
     kind: 'enemy_hit',
-    text: `적 반격 — HP -${dmg}`,
+    text: dmg > 0 ? `적 반격 — HP -${dmg}` : '적 공격 무효',
     value: dmg,
     partyHp: state.partyHp,
     enemyHp: state.enemyHp,
@@ -247,14 +295,25 @@ export function buildBattlePlayback(input: AutoBattleInput): BattlePlaybackResul
     inkStack: state.inkStack,
   });
 
+  if (state.varianceFloor > 0 || state.varianceCeilingPct > 0) {
+    pushEvent(events, {
+      phase: 'system',
+      turn: 0,
+      kind: 'system',
+      text: `변동 보정 — 랜덤 최소 +${state.varianceFloor}${state.varianceCeilingPct > 0 ? ` · 천장 +${state.varianceCeilingPct}%` : ''}`,
+      inkStack: state.inkStack,
+    });
+  }
+
   let totalDamage = 0;
   let turns = 0;
 
   while (!state.isVictory() && !state.isDefeat() && state.turn < MAX_TURNS) {
-    totalDamage += resolvePlayerTurnEvents(state, deck, party, events);
+    const { damage, blockChance } = resolvePlayerTurnEvents(state, deck, party, events);
+    totalDamage += damage;
     turns++;
     if (state.isVictory()) break;
-    resolveEnemyTurnEvents(state, events);
+    resolveEnemyTurnEvents(state, events, blockChance);
   }
 
   const victory = state.isVictory();
